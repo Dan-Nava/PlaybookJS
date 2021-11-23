@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head link >
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Demo</title>
+    <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script defer type="text/javascript" src='js/Playbook.js'></script>
+    <script defer type="text/javascript" src='js/examples.js'></script>
+
+ </head>
+ <body style="display: flex; flex-direction: column; width: 70em;">
+    <div style = 'display: flex; flex-direction: row; justify-content: space-between; margin: 0.5em'>
+        <div>
+            Animation Controls:
+            <button id='run-button' onclick= run()> Run </button>
+            <button id='reset-button' onclick= reset()> Reset </button>
+            <button id='pause-button' onclick= pause()> Pause </button>
+            <button id='unpause-button' onclick= unpause()> Unpause </button>
+        </div>
+        <div>
+            Creation Controls:
+            <button id='create-button' onclick= makeToken()> Create Token </button>
+            <button id='delete-button' onclick= deleteObject()> Delete </button>
+        </div>
+     </div>
+     <div id='field-container'></div>
+ </body>
+</html>
