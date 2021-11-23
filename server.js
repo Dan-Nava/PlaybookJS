@@ -26,7 +26,7 @@ app.get('/', (req, res) => {
 	//res.send('This should be the root route!')
 
 	//sending some HTML
-	res.send('https://agile-beach-49037.herokuapp.com/ | https://git.heroku.com/agile-beach-49037.git')
+	res.send('https://afternoon-ocean-99848.herokuapp.com/ | https://git.heroku.com/afternoon-ocean-99848.git')
 })
 
 // Error codes
