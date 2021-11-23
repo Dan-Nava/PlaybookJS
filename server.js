@@ -24,9 +24,7 @@ app.use(express.static(path.join(__dirname, '/pub')))
 app.get('/', (req, res) => {
 	// sending a string
 	//res.send('This should be the root route!')
-
-	//sending some HTML
-	res.send('/js/examples.html')
+	res.sendFile(__dirname + '/js/examples.html')
 })
 
 // Error codes
