@@ -6,7 +6,6 @@ play.addField(field1);
 field1.createField($('#field-container')[0], 'field1', '70em', '37em', '0.5em solid black', 'green');
 let selected = null;
 let prevStyle = null;
-
 //selection
 $("#" + field1.id)[0].addEventListener('click', select);
 function select(e){
@@ -63,9 +62,9 @@ function deleteObject() {
             selected.play.removeToken(selected);
             selected.deleteToken();
             selected = null;
-            prevStyle = null;
-            
+            prevStyle = null; 
             break;
+
         case 'BreakPoint':
             bpsToRemove = selected.path.breakPoints
             .splice(selected.path.breakPoints.indexOf(selected));
@@ -85,18 +84,49 @@ function deleteObject() {
             selected = null;
             prevStyle = null;
             break;
+            
         default:
             return null;
     }
 }
 
-function makeToken(){
+function makeToken(xpos, ypos, string){
     const t = new Token();
     play.addToken(t);
-    t.createToken('token' + play.tokens.indexOf(t), 'orange');
+    t.createToken('token' + play.tokens.indexOf(t), 'orange', xpos, ypos);
     t.allowDrag(true);
     t.extendPathFromToken('dblclick', 'dblclick');
+    if (string === undefined){
+        string ='';
+    }
+    $('#' + t.id)[0].innerHTML = "<p><font size=5>" + string + "</font></p>";
+    $('#' + t.id)[0].style.textAlign = 'center';
 }
+
+//o-line
+for (let i = 0; i < 5; i++){makeToken(24 + (i*4),20, 'OL');}
+makeToken(10, 20, 'WR');
+makeToken(54, 20, 'WR');
+makeToken(32, 24, 'QB');
+makeToken(32, 28, 'RB');
+
+//extremely jank, will need to refactor library functions to avoid this from happening
+// creates 2 basic paths for both WR tokens
+play.tokens[6].path.extendPath();
+let bp1 = play.tokens[6].path.breakPoints[0];
+$('#' + bp1.id)[0].style.top = '5em';
+$('#' + bp1.id)[0].style.left = '54.5em';
+bp1.extendPathFromBP('dblclick');
+bp1.leftBranch.updateBranchPosition();
+bp1.toggleVisibility(false);
+
+play.tokens[5].path.extendPath();
+let bp2 = play.tokens[5].path.breakPoints[0];
+bp2.extendPathFromBP('dblclick');
+$('#' + bp2.id)[0].style.top = '5em';
+$('#' + bp2.id)[0].style.left = '10.5em';
+bp2.leftBranch.updateBranchPosition();
+bp2.toggleVisibility(false);
 
 function run() {
     for (let i = 0; i < play.tokens.length; i++){
@@ -124,9 +154,9 @@ function pause() {
     }
 }
 
-function unpause() {
+function resume() {
     for (let i = 0; i < play.tokens.length; i++){
-        play.tokens[i].unpauseAnimation();
+        play.tokens[i].resumeAnimation();
     }
 }
 
@@ -155,4 +185,4 @@ function animStateHandler(running) {
         deleteButton.disabled = true;
     }
 }
-animStateHandler(); //this just initially has the reset/pause/unpause disabled
+animStateHandler();
