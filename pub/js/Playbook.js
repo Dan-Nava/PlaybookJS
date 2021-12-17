@@ -7,6 +7,14 @@ class Playbook {
         //array of plays
         this.plays = [];
     }
+
+    addPlay(play) {
+        this.plays.push(play);
+    }
+
+    removePlay(play) {
+        this.plays = this.plays.filter(p => p !== play);
+    }
 }
 
 // houses a field and its respective tokens
@@ -97,8 +105,16 @@ class Field {
             }
         }
     }
-}
 
+    deleteField() {
+        this.play = null;
+        this.deleteFieldVisual();
+    }
+
+    deleteFieldVisual(){
+        $('#' + this.id)[0].remove();
+    }
+}
 
 
 class Token {
@@ -185,12 +201,14 @@ class Token {
     }
 
     //DOM FUNCTION
-    createToken(id, color) {
+    createToken(id, color, xpos, ypos) {
         //creates the token, shape will be based on user input: square, circle, triangle, hexagon, octagon
         const token = document.createElement('div');
         token.style = 'width: 60px; height: 60px; border-radius: 50%; background-color:' + color + ';';
         token.style.position = 'absolute';
         token.style.zIndex = '2';
+        token.style.top = ypos + 'em';
+        token.style.left = xpos + 'em';
         token.id = id;
         this.id = id;
         token.className = 'playbook-token';
@@ -272,10 +290,10 @@ class Token {
         let token = $('#' + this.id)[0];
         if (token.getAnimations().length !== 0) {
             token.getAnimations().at(-1).pause();
-        }
+        }   
     }
 
-    unpauseAnimation() {
+    resumeAnimation() {
         let token = $('#' + this.id)[0];
         if (token.getAnimations().length !== 0) {
             token.getAnimations().at(-1).play();
@@ -327,7 +345,7 @@ class Path {
         // create BP and Branch visuals
         bp.createBreakPoint(this.id + '-bp' + this.breakPoints.indexOf(bp), branch.startBP);
         bp.allowDrag(true);
-        bp.ExtendPathfromBP(bpExtendPathEvent);
+        bp.extendPathFromBP(bpExtendPathEvent);
         branch.createBranch(this.id + '-branch' + this.branches.indexOf(branch));
 
         //Adds bp and branch to arrays of all bps and branches in play object
@@ -348,7 +366,6 @@ class Path {
         this.branches = this.branches.filter(b => b !== branch);
     }
 }
-
 
 
 class Branch {
@@ -407,6 +424,17 @@ class Branch {
     deleteBranchVisual() {
         $('#' + this.id)[0].remove();
     }
+
+    toggleVisibility(visible){
+        let branch = $('#' + this.id)[0];
+
+        if (!visible){
+            branch.style.visibility = 'hidden';
+        }
+        else{
+            branch.style.visibility = 'visible';
+        }
+    }
 }
 
 
@@ -457,7 +485,7 @@ class BreakPoint {
         }
     }
 
-    ExtendPathfromBP(ExtendPathEvent) {
+    extendPathFromBP(ExtendPathEvent) {
         $('#' + this.id)[0].addEventListener(ExtendPathEvent, handleEvent);
         let t = this;
         function handleEvent() {
