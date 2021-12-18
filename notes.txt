@@ -1,0 +1,139 @@
+- can implement easy to use UI to structure and show built plays
+- can easily create animations 
+
+
+PlaybookJS
+
+sandbox for creating sports visuals and animations with a playbook style
+
+
+- drag and drop tokens that are fully customizable
+	- tokens should hold data important to user/dev
+	- should be allowed to let dev add attributes to said tokens
+
+
+MAIN FEATURES:
+- tokens to represent players and ball/puck etc. = tokens
+- field to represent "playing area" for tokens = field/play
+- ability to easily animate token movement (potentially using arrows of some sort) = animations and paths
+	- arrows/lines (customizable) should exist as indicators for things like football = indicators
+- functionality to have token movement sync with other token movement based on a timeline of sorts. = Timeline
+- each field/play should be saveable into a playbook = playbook/groups
+	- potentially have playbooks contain default aspects so that new plays can be quickly populated
+
+createMovement();
+
+phase 1:
+- tokens
+    - allow full cuztomizability of appereance
+    - maybe have a basic template (createToken() vs. createCustomToken())
+    - allow for drag and drop anywhere in the designated field area
+    - by default tokens could be draggable but this could be removed if wanted?
+
+- field
+   - save states?
+- items (like balls)
+- animations
+- saving mechanic for plays and playbooks
+- quick build for tokens/indicators
+
+phase 2:
+- timeline sync with animations
+- template plays based on playbook defined values
+
+
+1. a play must be built first before anything else
+2. Fields MUST be built prior to token creation
+
+
+
+    /** potential functionality:
+     * 1. user can define preset features for quick template builds 
+     * 
+     * 
+     **/
+
+TO ADD:
+- elements that can be used to quickly align multiple objects (like a line of scrimmage)
+- playbook/play organization mechanic, including template creation based on designated play layout
+- more customizability for tokens/bps/branches
+
+one thing to work on:
+alot of the code can be further generalized so as to give the developer more flexibility, the goal is to do that
+MAIN CHANGE:
+functions are NOT developer friendly right now, need to change that. what  i mean is the example was an L to build.
+revamp functions so creating pre-built paths and branches is easy.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Note: mention we need JQuery
+
+features:
+	- tokens and fields require a play to exist
+	- you can setTokenVisual to a custom dom element, turning it into a token
+	  or use createTokenVisual to make a default basic one
+	- by default we assume tokens and bps are allowed to be draggable
+	  this can be set to false
+	- bps and tokens can have a prebuilt object be set as their DOM visual
+	  using setXXXXX() or one can quickly generate a pre-built using 
+	  createXXXX()
+
+
+LITERALLY JUST THESE 2 AND MOVE ON TO API DOCUMENTATION + WEBSITE
+Bare minimum:
+- modify dev API so building paths (branches and bps) is easy.
+	- 
+
+
+- add more customizability for paths, bps, tokens, branches
+	- add functions to modify appearance of branches
+		- in path() object, but maybe also in BP and branch itself
+	- then add general appereance modification for field, branch
+		- field to be given a custom element
+	- ALSO, animation customization
+
+
+IF you have time:
+- image support
+- plays saving visual state
+- easy access to when an animation is complete
+
+GENERAL ORDER OF WORK:
+1. modify dev API
+2. add customizability
+3. port to anonymous function to implement encapsulation
+4. make API DOC
+5. build example website
+
+
+for 1 and 2:
+ - put animation functions into play
+ - image support to tokens, field	 
+
+what am i gonna show for examples?
+ - devs can easily setup so users can build they're own plays (basically example phase1 again)
+ - animations can be modified to increase/decrease speed etc. (animation customization)
+ - tokens, fields, bps and branches can be customized as well
+ - creatings paths is easy for devs too! (dragenable/disable)
+ - (if i have time to implement play saving, do one for that too)

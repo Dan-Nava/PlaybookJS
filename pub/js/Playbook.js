@@ -2,83 +2,127 @@
 
 // the constructor function should instantiate any variables that
 //  each Playbook instance should have a unique version of.
-class Playbook {
-    constructor() {
-        //array of plays
-        this.plays = [];
-    }
+function Playbook() {
+    this.plays = []; //array of plays
+}
 
+Playbook.prototype = {
     addPlay(play) {
         this.plays.push(play);
-    }
+    },
 
     removePlay(play) {
         this.plays = this.plays.filter(p => p !== play);
-    }
+    },
 }
 
-// houses a field and its respective tokens
-class Play {
-    constructor() {
 
-        this.field = null; //field represents the area the tokens and indicators etc. can interact with
-        this.tokens = []; //tokens that represent players, the ball etc.
-        this.branches = []; //all branches within the play
-        this.breakPoints = []; //all breakpoints within the play
-    }
+// houses a field and its respective tokens
+function Play() {
+    this.field = null; //field represents the area the tokens and indicators etc. can interact with
+    this.tokens = []; //tokens that represent players, the ball etc.
+    this.branches = []; //all branches within the play
+    this.breakPoints = []; //all breakpoints within the play
+}
     
+Play.prototype =  {
+    runAnimations(duration, delay = 0, iterations = 1, easing = 'linear') {
+        for (let i = 0; i < this.tokens.length; i++){
+            this.tokens[i].runAnimation(duration, delay, iterations, easing);
+            this.tokens[i].allowDrag(false);
+            let bps = this.tokens[i].path.breakPoints;
+            for (let j = 0; j < bps.length; j++){bps[j].allowDrag(false);}
+        }
+    },
+    resetAnimations() {
+        for (let i = 0; i < this.tokens.length; i++){
+            this.tokens[i].resetAnimation();
+            this.tokens[i].allowDrag(true);
+            let bps = this.tokens[i].path.breakPoints;
+            for (let j = 0; j < bps.length; j++){bps[j].allowDrag(true);}
+        }
+    },
+    pauseAnimations() {
+        for (let i = 0; i < this.tokens.length; i++){
+            this.tokens[i].pauseAnimation();
+        }
+    },
+    resumeAnimations() {
+        for (let i = 0; i < this.tokens.length; i++){
+            this.tokens[i].resumeAnimation();
+        }
+    },
+    getAllTokenAnimations() {
+        for (let i = 0; i < this.tokens.length; i){
+            return this.tokens[i].getAllAnimations();
+        }   
+    },
     // connects field to play and viceversa
     addField(field) {
         this.field = field;
         field.play = this;
-    }
+    },
     removeField() {
         this.field.play = null;
         this.field = null;
-    }
+    },
     addToken(token) {
         this.tokens.push(token);
         token.play = this;
-    }
+    },
     removeToken(token) {
         token.play = null;
         this.tokens = this.tokens.filter(t => t !== token);
-    }
+    },
     addBreakPoint(bp) {
         this.breakPoints.push(bp);
-    }
+    },
     removeBreakPoint(bp) {
         this.breakPoints = this.breakPoints.filter(b => b !== bp);
-    }
+    },
     addBranch(branch) {
         this.branches.push(branch);
-    }
+    },
     removeBranch(branch) {
         this.branches = this.branches.filter(b => b !== branch);
     }
 }
 
 
-class Field {
-    constructor() {
-        this.play = null; //associated play that the field is a part of
-        this.id = null;
-    }
+function Field(play) {
+    this.play = play; //associated play that the field is a part of
+    this.id = null;
+    play.addField(this)
+}
+
+Field.prototype = {
     // DOM FUNCTION
     createField(container, id, width, height, borderStyle, backgroundColor) {
-        this.id = id;
-
         const field = document.createElement('div');
         field.style.width = width;
         field.style.height = height;
         field.style.border = borderStyle;
         field.style.backgroundColor = backgroundColor;
+       
+
+
+        this.setField(field, container, id)
+    },
+    setField(field, container, id) {
+        this.id = id;
         field.id = id;
         field.style.position = 'relative';
-
         const body = container;
-        body.append(field);
-    }
+        body.append(field); 
+    },
+
+    setFieldImage(imageSrc, size, repeat, position) {
+        const elem = this.getDOMElement();
+        elem.style.backgroundImage = 'url(' + imageSrc + ')';
+        elem.style.backgroundRepeat = repeat;
+        elem.style.backgroundSize = size;
+        elem.style.backgroundPosition = position;
+    },
 
     selectObject(e) {
         const targetClass = e.target.className;
@@ -104,26 +148,32 @@ class Field {
                 return (objects[i]);
             }
         }
-    }
+    },
 
     deleteField() {
         this.play = null;
         this.deleteFieldVisual();
-    }
-
+    },
     deleteFieldVisual(){
-        $('#' + this.id)[0].remove();
-    }
+        this.getDOMElement().remove();
+    },
+    getDOMElement() {
+        return  $('#' + this.id)[0];
+    },
+
 }
 
 
-class Token {
-    constructor() {
-        this.play = null;
-        this.path = null;
-        this.id = null;
-    }
+function Token(play) {
+    this.play = play;
+    this.path = null;
+    this.animationInfo = {numOfAnimations: null, animationsFinished: null}
+    this.id = 'token' + (play.tokens.length);
+    play.addToken(this);
+    this.createTokenPath();
+}
 
+Token.prototype = {
     //DOM FUNCTION
     allowDrag(enable) {
         let token = $('#' + this.id)[0];
@@ -198,51 +248,71 @@ class Token {
                 token.style.left = (token.offsetLeft - diffX) + 'px';
             }
         }
-    }
+    },
 
     //DOM FUNCTION
-    createToken(id, color, xpos, ypos) {
-        //creates the token, shape will be based on user input: square, circle, triangle, hexagon, octagon
+    createTokenVisual(color, xpos, ypos, width, height, shape) {
+        //creates the token, shape will be based on user input: square, circle
+        let borderRadius;
+        if (shape === 'circle'){
+            borderRadius = '50%'
+        } else if (shape === 'square'){
+            borderRadius = '0%'
+        }
         const token = document.createElement('div');
-        token.style = 'width: 60px; height: 60px; border-radius: 50%; background-color:' + color + ';';
+        token.style = 'width:' + width + '; height:' + height + 
+        '; border-radius:' + borderRadius + '; background-color:' + color + ';';
+        this.setTokenVisual(token, xpos, ypos);
+    },
+
+    //DOM FCN
+    setTokenVisual(token, xpos, ypos){
+        token.style.top = ypos;
+        token.style.left = xpos;
         token.style.position = 'absolute';
         token.style.zIndex = '2';
-        token.style.top = ypos + 'em';
-        token.style.left = xpos + 'em';
-        token.id = id;
-        this.id = id;
         token.className = 'playbook-token';
-
+        token.id = this.id;
+        
         const field = $('#' + this.play.field.id)[0];
         field.append(token);
-        const path = new Path(this, id + '-path');
-        this.addPath(path);
-    }
+    },
+
+    setTokenImage(imageSrc, size, repeat, position) {
+        const elem = this.getDOMElement();
+        elem.style.backgroundImage = 'url(' + imageSrc + ')';
+        elem.style.backgroundRepeat = repeat;
+        elem.style.backgroundSize = size;
+        elem.style.backgroundPosition = position;
+    },
+
+    getDOMElement(){
+        return $('#' + this.id)[0];
+    },
 
     deleteToken(){
         this.path.token = null;
         this.path = null;
         this.play = null;
         this.deleteTokenVisual();
-    }
+    },
 
     deleteTokenVisual(){
-        $('#' + this.id)[0].remove();
-    }
+       this.getDOMElement().remove();
+    },
 
-    extendPathFromToken(tokenExtendPathEvent, bpExtendPathEvent){
-        let t = this;
-        $('#' + t.id)[0].addEventListener(tokenExtendPathEvent, handleEvent);
-
-        function handleEvent(){
-            if (t.path.breakPoints.length === 0){
-                t.path.extendPath(bpExtendPathEvent);
-            }
+    canAddJointFromHere() {
+        if (this.path.breakPoints.length === 0){
+            return true
+        } else {
+            return false
         }
-    }
+    },
 
-    animateAll(array, value) {
-        const token = $('#' + this.id)[0];
+    //animates token along its entire path
+    animateAll(array, value, duration, delay, iterations, easing) {
+        let t = this;
+        const token = this.getDOMElement();
         const destination = $('#' + array[value].id)[0];
         let tokenX = token.offsetLeft + token.clientWidth / 2;
         let tokenY = token.offsetTop + token.clientHeight / 2;
@@ -252,30 +322,39 @@ class Token {
         const dy = destinationY - tokenY;
 
         const anim = token.animate([{ transform: 'translateX(' + dx + 'px) translateY(' + dy + 'px)' }],
-            { duration: 500, easing: 'linear' });
-
+            { duration: duration, delay: delay, iterations: iterations, easing: easing });
         anim.onfinish = function () {
             token.style.transform = 'translateX(' + dx + 'px) translateY(' + dy + 'px)';
+            t.animationInfo.animationsFinished += 1;
         };
 
         if (value < array.length - 1) {
             anim.onfinish = () => {
+                t.animationInfo.animationsFinished += 1;
                 token.style.transform = 'translateX(' + dx + 'px) translateY(' + dy + 'px)';
-                this.animateAll(array, value + 1);
+                this.animateAll(array, value + 1, duration, delay, iterations, easing);
             };
         }
-    }
+    },
 
-    runAnimation() {
-        let token = $('#' + this.id)[0];
+    currentAnimation() {
+        return this.getDOMElement().getAnimations();  
+    },
+
+    runAnimation(duration, delay = 0, iterations = 1, easing = 'linear', array = this.path.breakPoints) {
+        let token = this.getDOMElement();
+         this.animationInfo.numOfAnimations = array.length;
+         this.animationInfo.animationsFinished = 0;
         //runs animation only if token is at its initial position
-        if (this.path.breakPoints.length !== 0 && token.style.transform === '') {
-            this.animateAll(this.path.breakPoints, 0);
+        if (array.length !== 0 && token.style.transform === '') {
+            this.animateAll(array, 0, duration, delay, iterations, easing);
         }
-    }
+    },
 
     resetAnimation() {
-        let token = $('#' + this.id)[0];
+        this.animationInfo.numOfAnimations = null;
+        this.animationInfo.animationsFinished = null;
+        let token =this.getDOMElement();
         //this for loop accounts for reseting mid animation
         if (token.getAnimations().length !== 0) {
             for (let i = 0; i < token.getAnimations().length; i++) {
@@ -284,46 +363,46 @@ class Token {
         }
         //reseting at the end of full animation
         token.style.transform = '';
-    }
+    },
 
     pauseAnimation() {
-        let token = $('#' + this.id)[0];
+        let token = this.getDOMElement();
         if (token.getAnimations().length !== 0) {
             token.getAnimations().at(-1).pause();
         }   
-    }
+    },
 
     resumeAnimation() {
-        let token = $('#' + this.id)[0];
+        let token = this.getDOMElement();
         if (token.getAnimations().length !== 0) {
             token.getAnimations().at(-1).play();
         }
-    }
+    },
 
-    addPath(path) {
+    createTokenPath(){ 
+        const path = new Path(this, this.id + '-path');
         this.path = path;
-    }
-
+    },
     removePath() {
         this.path = null;
-    }
+    },
 }
 
 
-class Path {
-    constructor(token, id) {
-        this.id = id;
-        this.token = token; //token it belongs to
-        this.branches = [];
-        this.breakPoints = [];
-    }
-    //we note this is the ONLY time branches + bps are made
-    //triggerEvent refers to how breakpoints will extend 
-    extendPath(bpExtendPathEvent) {
+function Path(token, id) {
+    this.id = id;
+    this.token = token; //token it belongs to
+    this.branches = [];
+    this.breakPoints = [];
+}
 
+Path.prototype = {
+    //We note this is the ONLY time branches + bps are made
+    //this specifically only creates the js objects for 1 branch and 1 BP (no visuals)
+    createPathJoint() {
         //create BP and Branch objects
-        const bp = new BreakPoint(this);
-        const branch = new Branch(this);
+        const bp = new BreakPoint(this, this.id + '-bp' + this.breakPoints.length);
+        const branch = new Branch(this, this.id + '-branch' + this.branches.length);
 
         //add BP & branch to arrays
         if (this.branches.length === 0) { //empty so, startBP is the token
@@ -339,63 +418,65 @@ class Path {
 
         bp.leftBranch = branch; //assigns new branch to leftbranch of new BP
 
+        //adds BP and Branch to Path arrays
         this.addBranch(branch);
         this.addBreakPoint(bp);
-
-        // create BP and Branch visuals
-        bp.createBreakPoint(this.id + '-bp' + this.breakPoints.indexOf(bp), branch.startBP);
-        bp.allowDrag(true);
-        bp.extendPathFromBP(bpExtendPathEvent);
-        branch.createBranch(this.id + '-branch' + this.branches.indexOf(branch));
-
-        //Adds bp and branch to arrays of all bps and branches in play object
+        //adds BP and Branch to Play arrays
         this.token.play.addBreakPoint(bp);
         this.token.play.addBranch(branch);
-    }
+        return {breakPoint: bp, branch: branch}
+    },
 
     addBreakPoint(bp) {
         this.breakPoints.push(bp);
-    }
+    },
     removeBreakPoint(bp) {
         this.breakPoints = this.breakPoints.filter(b => b !== bp);
-    }
+    },
     addBranch(branch) {
         this.branches.push(branch);
-    }
+    },
     removeBranch(branch) {
         this.branches = this.branches.filter(b => b !== branch);
-    }
+    },
 }
 
 
-class Branch {
-    constructor(path) {
-        this.id = null;
-        this.path = path;
-        this.startBP = null;
-        this.endBP = null;
-    }
-    createBranch(id) {
-        const start = $('#' + this.startBP.id)[0];
+function Branch(path, id) {
+    this.id = id;
+    this.path = path;
+    this.startBP = null;
+    this.endBP = null;
+}
+
+Branch.prototype = {
+    createBranchVisual(color, width, height) {
+        const start = this.startBP.getDOMElement();
         const branch = document.createElement('div');
-        branch.style = 'width: 20px; height: 10px; background-color: black;';
+        branch.style = 'width:' + width + '; height:' + height + '; background-color: ' + color + ';';
         branch.style.position = 'absolute';
         branch.style.zIndex = '1';
         branch.style.top = (start.offsetTop + start.clientHeight / 2) + 'px';
         branch.style.left = (start.offsetLeft + (start.clientWidth / 2) - 10) + 'px';
         branch.style.transformOrigin = 0 + 'px 5px';
         branch.style.transition = 'rotate 0.1s';
-        branch.id = id;
+        branch.id = this.id;
         branch.className = 'playbook-branch';
-        this.id = id;
 
-        const field = $('#' + this.path.token.play.field.id)[0];
+        const field = this.path.token.play.field.getDOMElement();
         field.append(branch);
         this.updateBranchPosition();
-    }
+    },
+    setBranchImage(imageSrc, size, repeat, position) {
+        const elem = this.getDOMElement();
+        elem.style.backgroundImage = 'url(' + imageSrc + ')';
+        elem.style.backgroundRepeat = repeat;
+        elem.style.backgroundSize = size;
+        elem.style.backgroundPosition = position;
+    },
     updateBranchPosition() {
-        const startBP = $('#' + this.startBP.id)[0];
-        const endBP = $('#' + this.endBP.id)[0];
+        const startBP = this.startBP.getDOMElement();
+        const endBP = this.endBP.getDOMElement();
         const startX = startBP.offsetLeft + startBP.clientWidth / 2;
         const startY = startBP.offsetTop + startBP.clientHeight / 2;
         const endX = endBP.offsetLeft + endBP.clientWidth / 2;
@@ -407,11 +488,16 @@ class Branch {
         //angle between the branch and X-axis
         const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
 
-        $('#' + this.id)[0].style.width = length + 'px';
-        $('#' + this.id)[0].style.left = (startBP.offsetLeft + startBP.clientWidth / 2) + 'px';
-        $('#' + this.id)[0].style.top = (startBP.offsetTop + startBP.clientHeight / 2) + 'px';
-        $('#' + this.id)[0].style.transform = 'rotate(' + angle + 'deg)';
-    }
+        const visual = this.getDOMElement();
+        visual.style.width = length + 'px';
+        visual.style.left = (startBP.offsetLeft + startBP.clientWidth / 2) + 'px';
+        visual.style.top = (startBP.offsetTop + startBP.clientHeight / 2) + 'px';
+        visual.style.transform = 'rotate(' + angle + 'deg)';
+    },
+
+    getDOMElement() {
+        return $('#' + this.id)[0];
+    },
 
     deleteBranch(){
         this.path = null;
@@ -419,14 +505,14 @@ class Branch {
         this.startBP.rightBranch = null;
         this.startBP = null;
         this.deleteBranchVisual();
-    }
+    },
 
     deleteBranchVisual() {
-        $('#' + this.id)[0].remove();
-    }
+        this.getDOMElement().remove();
+    },
 
     toggleVisibility(visible){
-        let branch = $('#' + this.id)[0];
+        let branch = this.getDOMElement();
 
         if (!visible){
             branch.style.visibility = 'hidden';
@@ -434,71 +520,101 @@ class Branch {
         else{
             branch.style.visibility = 'visible';
         }
-    }
+    },
 }
 
 
-class BreakPoint {
-    constructor(path) {
-        this.id = null;
-        this.path = path;
-        this.leftBranch = null;
-        this.rightBranch = null;
-    }
+function BreakPoint(path, id) {
+    this.id = id;
+    this.path = path;
+    this.leftBranch = null;
+    this.rightBranch = null;
+}
+
+BreakPoint.prototype = {
     //DOM
-    createBreakPoint(id, token) {
+    createBPVisual(color, xpos, ypos, width, height, shape) {
+        // const token = this.leftBranch.startBP.getDOMElement();
         const bp = document.createElement('div');
-        bp.style = 'width: 40px; height: 40px; border-radius: 50%; background-color: rgb(0,0,0, 0.4);';
+        let borderRadius;
+        if (shape === 'circle'){
+            borderRadius = '50%'
+        } else if (shape === 'square'){
+            borderRadius = '0%'
+        }
+        bp.style = 'width:' + width + '; height:' + height + 
+        '; border-radius:' + borderRadius + '; background-color:' + color + ';';
         bp.style.position = 'absolute';
         bp.style.zIndex = '3';
-        bp.style.top = $('#' + token.id)[0].offsetTop + 'px';
-        bp.style.left = $('#' + token.id)[0].offsetLeft + 'px';
+        this.setBPVisual(bp, xpos, ypos);
+    },
 
-        bp.id = id;
-        this.id = id;
+    //DOM FCN
+    setBPVisual(bp, xpos, ypos){
+        bp.style.top = ypos;
+        bp.style.left = xpos;
         bp.className = 'playbook-breakpoint';
-
-        const field = $('#' + this.path.token.play.field.id)[0];
+        bp.id = this.id;
+        
+        const field = this.path.token.play.field.getDOMElement();
         field.append(bp);
-    }
-
+    },
+    setBPImage(imageSrc, size, repeat, position) {
+        const elem = this.getDOMElement();
+        elem.style.backgroundImage = 'url(' + imageSrc + ')';
+        elem.style.backgroundRepeat = repeat;
+        elem.style.backgroundSize = size;
+        elem.style.backgroundPosition = position;
+    },
     deleteBP(){
         this.path = null;
         this.rightBranch = null;
         this.leftBranch = null;
         //left branch will ALWAYS hold a value, right may not
         this.deleteBPVisual();
-    }
+    },
 
     deleteBPVisual(){
-        $('#' + this.id)[0].remove();
-    }
+        this.getDOMElement().remove();
+    },
+
+    getDOMElement(){
+        return $('#' + this.id)[0];
+    },
 
     toggleVisibility(visible){
-        let bp = $('#' + this.id)[0];
-
+        let bp = this.getDOMElement();
         if (!visible){
             bp.style.visibility = 'hidden';
         }
         else{
             bp.style.visibility = 'visible';
         }
-    }
+    },
 
-    extendPathFromBP(ExtendPathEvent) {
-        $('#' + this.id)[0].addEventListener(ExtendPathEvent, handleEvent);
-        let t = this;
-        function handleEvent() {
-            if (t.rightBranch === null) {
-                t.path.extendPath(ExtendPathEvent);
-            }
+    canAddJointFromHere() {
+        if (!this.rightBranch){
+            return true
+        } else {
+            return false
         }
-    }
+    },
+
+    setBPPosition(x, y) {
+        const bp = this.getDOMElement();
+        bp.style.left = x;
+        bp.style.top = y;
+
+        this.leftBranch.updateBranchPosition();
+        if (this.rightBranch){
+            this.rightBranch.updateBranchPosition();
+        }
+    },
 
     //DOM FUNCTION
     allowDrag(enable) {
-        let token = $('#' + this.id)[0];
-        let parent = $('#' + this.path.token.play.field.id)[0];
+        let token = this.getDOMElement();
+        let parent = this.path.token.play.field.getDOMElement();
         let cursorX = null;
         let cursorY = null;
         let t = this;
@@ -569,7 +685,7 @@ class BreakPoint {
                 token.style.left = (token.offsetLeft - diffX) + 'px';
             }
         }
-    }
+    },
 }
 
 

@@ -1,19 +1,20 @@
 "use strict";
 
 const play = new Play();
-const field1 = new Field();
-play.addField(field1);
-field1.createField($('#field-container')[0], 'field1', '70em', '37em', '0.5em solid black', 'green');
+const field1 = new Field(play);
+field1.createField($('#field-container')[0], 'field1', '65em', '39em', '0.5em solid black', 'transparent');
+field1.setFieldImage( 'images/field.jpg', 'cover', 'center', 'no-repeat');
+////SELECTION & DELETION CODE///////
 let selected = null;
 let prevStyle = null;
 //selection
-$("#" + field1.id)[0].addEventListener('click', select);
-function select(e){
+field1.getDOMElement().addEventListener('click', select);
+function select(e){ //this function does the VISUAL selection
     let previous = selected;
     let bps;
 
-    if (previous){
-        $('#' + previous.id)[0].style.border = prevStyle;
+    if (previous){ //VISUAL - reverts previously selected token + path to unselected visual
+       previous.getDOMElement().style.border = prevStyle;
         bps = selected.path.breakPoints;
         for (let i = 0; i < bps.length; i++){
             bps[i].toggleVisibility(false);
@@ -21,51 +22,49 @@ function select(e){
     }
 
     selected = field1.selectObject(e);
-    if (selected){
+    if (selected){  //VISUAL - changes selected token + path to select visual
         bps = selected.path.breakPoints;
         for (let i = 0; i < bps.length; i++){
             bps[i].toggleVisibility(true);
         }
     }
 
-    if (selected instanceof Branch){selected = null;}
-    if (selected) {
-       prevStyle = $('#' + selected.id)[0].style.border;
-       $('#' + selected.id)[0].style.border = '3px solid red';
+    if (selected && !(selected instanceof Branch)) { //VISUAL - changes selected token + path to select visual
+       prevStyle = selected.getDOMElement().style.border;
+       selected.getDOMElement().style.border = '3px solid red';
     }
 }
 
 //this deletion will delete everything starting from the token and bp
 function deleteObject() {
+   
     let bpsToRemove;
     let branchesToRemove;
 
-    if (selected === null){
+    if (selected === null){ //if nothing's selected ignore this
         return null;
     }
 
-    switch (selected.constructor.name) {
-        case 'Token':
-            bpsToRemove = selected.path.breakPoints;
-            branchesToRemove = selected.path.branches;
+    if (selected instanceof Token){
+        bpsToRemove = selected.path.breakPoints;
+        branchesToRemove = selected.path.branches;
 
-            for (let i = 0; i < bpsToRemove.length; i++) {
-                let bp = bpsToRemove[i];
-                bp.path.token.play.removeBreakPoint(bp);
-                bp.deleteBP();
-            } 
-            for (let i = 0; i < branchesToRemove.length; i++){
-                let branch = branchesToRemove[i];
-                branch.path.token.play.removeBranch(branch);
-                branch.deleteBranch();
-            }
-            selected.play.removeToken(selected);
-            selected.deleteToken();
-            selected = null;
-            prevStyle = null; 
-            break;
-
-        case 'BreakPoint':
+        for (let i = 0; i < bpsToRemove.length; i++) {
+            let bp = bpsToRemove[i];
+            bp.path.token.play.removeBreakPoint(bp);
+            bp.deleteBP();
+        } 
+        for (let i = 0; i < branchesToRemove.length; i++){
+            let branch = branchesToRemove[i];
+            branch.path.token.play.removeBranch(branch);
+            branch.deleteBranch();
+        }
+        selected.play.removeToken(selected);
+        selected.deleteToken();
+        selected = null;
+        prevStyle = null; 
+    }
+    else if (selected instanceof BreakPoint) {
             bpsToRemove = selected.path.breakPoints
             .splice(selected.path.breakPoints.indexOf(selected));
             branchesToRemove = selected.path.branches
@@ -83,81 +82,73 @@ function deleteObject() {
             }
             selected = null;
             prevStyle = null;
-            break;
-            
-        default:
-            return null;
+        }
     }
-}
 
-function makeToken(xpos, ypos, string){
-    const t = new Token();
-    play.addToken(t);
-    t.createToken('token' + play.tokens.indexOf(t), 'orange', xpos, ypos);
-    t.allowDrag(true);
-    t.extendPathFromToken('dblclick', 'dblclick');
+// MAKE A TOKEN
+//////////////////////////////////////////////////////////////////////
+
+function makeToken(color, xpos, ypos, string, image = null){
+    const t = new Token(play);
+    t.createTokenVisual(color, xpos, ypos, '60px', '60px', 'square');
+    if (image){t.setTokenImage(image, 'contain', 'no-repeat', 'center');}
+    t.allowDrag(true); //only use if want user interactivity
+    setPathExtensionListener('dblclick', t); //only use if want user interactivity
+    const visual = t.getDOMElement();
     if (string === undefined){
         string ='';
     }
-    $('#' + t.id)[0].innerHTML = "<p><font size=5>" + string + "</font></p>";
-    $('#' + t.id)[0].style.textAlign = 'center';
+    visual.innerHTML = "<p><font size=5 color='blue'>" + string + "</font></p>";
+    visual.style.textAlign = 'center';
 }
 
 //o-line
-for (let i = 0; i < 5; i++){makeToken(24 + (i*4),20, 'OL');}
-makeToken(10, 20, 'WR');
-makeToken(54, 20, 'WR');
-makeToken(32, 24, 'QB');
-makeToken(32, 28, 'RB');
+for (let i = 0; i < 5; i++){makeToken('orange', 24 + (i*4) + 'em',20 + 'em', 'OL');}
+makeToken('transparent', 10 + 'em', 20 + 'em','', 'images/helmet.png');
+makeToken('orange', 54 + 'em', 20 + 'em', 'WR');
+makeToken('orange', 32 + 'em', 24 + 'em', 'QB');
+makeToken('orange', 32 + 'em', 28 + 'em', 'RB');
 
-//extremely jank, will need to refactor library functions to avoid this from happening
-// creates 2 basic paths for both WR tokens
-play.tokens[6].path.extendPath();
-let bp1 = play.tokens[6].path.breakPoints[0];
-$('#' + bp1.id)[0].style.top = '5em';
-$('#' + bp1.id)[0].style.left = '54.5em';
-bp1.extendPathFromBP('dblclick');
-bp1.leftBranch.updateBranchPosition();
-bp1.toggleVisibility(false);
+//create paths for tokens
+//////////////////////////////////////////////////////////////////////
 
-play.tokens[5].path.extendPath();
-let bp2 = play.tokens[5].path.breakPoints[0];
-bp2.extendPathFromBP('dblclick');
-$('#' + bp2.id)[0].style.top = '5em';
-$('#' + bp2.id)[0].style.left = '10.5em';
-bp2.leftBranch.updateBranchPosition();
-bp2.toggleVisibility(false);
+const token1Path = play.tokens[6].path;
+let joint = token1Path.createPathJoint();
+joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)','54.5em', '5em',
+'60px', '60px', 'circle');
+setPathExtensionListener('dblclick', joint.breakPoint);
+joint.breakPoint.toggleVisibility(false);
+joint.branch.createBranchVisual('black', '12px', '12px');
+joint.breakPoint.allowDrag(true);
+
+const tokenpath2 = play.tokens[5].path;
+joint = tokenpath2.createPathJoint();
+joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)', '10.5em', '5em',
+'60px', '60px', 'circle');
+setPathExtensionListener('dblclick', joint.breakPoint);
+joint.breakPoint.toggleVisibility(false);
+joint.branch.createBranchVisual('black', '12px', '12px');
+joint.breakPoint.allowDrag(true);
+
+//////////////////////////////////////////////////////////////////////////
 
 function run() {
-    for (let i = 0; i < play.tokens.length; i++){
-        play.tokens[i].runAnimation();
-        play.tokens[i].allowDrag(false);
-        let bps = play.tokens[i].path.breakPoints;
-        for (let j = 0; j < bps.length; j++){bps[j].allowDrag(false);}
-    }
+    play.runAnimations(500);
     animStateHandler(true);
+    
 }
 
 function reset(){
-    for (let i = 0; i < play.tokens.length; i++){
-        play.tokens[i].resetAnimation();
-        play.tokens[i].allowDrag(true);
-        let bps = play.tokens[i].path.breakPoints;
-        for (let j = 0; j < bps.length; j++){bps[j].allowDrag(true);}
-    }
+    play.resetAnimations();
     animStateHandler(false);
 }
 
 function pause() {
-    for (let i = 0; i < play.tokens.length; i++){
-        play.tokens[i].pauseAnimation();
-    }
+    play.pauseAnimations();
 }
 
 function resume() {
-    for (let i = 0; i < play.tokens.length; i++){
-        play.tokens[i].resumeAnimation();
-    }
+    play.resumeAnimations();
 }
 
 function animStateHandler(running) {
@@ -186,3 +177,18 @@ function animStateHandler(running) {
     }
 }
 animStateHandler();
+
+function setPathExtensionListener(event, object){
+    object.getDOMElement().addEventListener(event, handleEvent);
+    function handleEvent(){
+        if (object.canAddJointFromHere()){
+            const joint = object.path.createPathJoint();
+            const token = joint.branch.startBP.getDOMElement();
+            joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)', token.offsetLeft + 'px', token.offsetTop + 'px',
+            '60px', '60px', 'circle');
+            joint.breakPoint.allowDrag(true);
+            setPathExtensionListener('dblclick', joint.breakPoint);
+            joint.branch.createBranchVisual('black', '12px', '12px');
+        }
+    }
+}
