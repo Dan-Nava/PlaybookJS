@@ -1,0 +1,24 @@
+#main-body {
+    display: flex; 
+    flex-direction: column; 
+    align-items: center;
+    margin: 0.1em;
+}
+
+#example-1-button-bar{
+    display: flex; 
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 0.5em;
+}
+
+#title{
+    font-size: 6em;
+    margin-bottom: 0.2em;
+}
+
+hr.solid{
+    margin: 2em;
+    border-top: 0.1em solid black;
+    width:100%;
+}

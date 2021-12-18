@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <!-- URL is https://afternoon-ocean-99848.herokuapp.com/ -->
 <html lang="en">
- <head link >
+ <head>
+     <link rel="stylesheet" href="style.css">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
@@ -11,20 +12,25 @@
     <script defer type="text/javascript" src='js/examples.js'></script>
 
  </head>
- <body style="display: flex; flex-direction: column; width: 70em; margin-left: 12em;">
-    <div style = 'display: flex; flex-direction: row; justify-content: space-between; margin: 0.5em'>
-        <div>
+ <body id='main-body'>
+    <div id='title'> PlaybookJS </div>
+    <div id='infoText'> insert text about what this is gonna be about here </div>
+    <hr class='solid'>
+    <div id='nav-bar'></div>
+    <hr class='solid'>
+    <div id='example-1-button-bar'>
+        <span id='animation-controls'>
             Animation Controls:
             <button id='run-button' onclick= run()> Run </button>
             <button id='reset-button' onclick= reset()> Reset </button>
             <button id='pause-button' onclick= pause()> Pause </button>
             <button id='unpause-button' onclick= resume()> Resume </button>
-        </div>
-        <div>
+        </span>
+        <span id='creation-controls'>
             Creation Controls:
             <button id='create-button' onclick= makeToken()> Create Token </button>
             <button id='delete-button' onclick= deleteObject()> Delete </button>
-        </div>
+        </span>
      </div>
      <div id='field-container'></div>
  </body>
