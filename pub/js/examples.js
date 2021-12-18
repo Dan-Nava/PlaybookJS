@@ -51,15 +51,12 @@ function deleteObject() {
 
         for (let i = 0; i < bpsToRemove.length; i++) {
             let bp = bpsToRemove[i];
-            bp.path.token.play.removeBreakPoint(bp);
             bp.deleteBP();
         } 
         for (let i = 0; i < branchesToRemove.length; i++){
             let branch = branchesToRemove[i];
-            branch.path.token.play.removeBranch(branch);
             branch.deleteBranch();
         }
-        selected.play.removeToken(selected);
         selected.deleteToken();
         selected = null;
         prevStyle = null; 
@@ -72,12 +69,10 @@ function deleteObject() {
 
             for (let i = 0; i < bpsToRemove.length; i++) {
                 let bp = bpsToRemove[i];
-                bp.path.token.play.removeBreakPoint(bp);
                 bp.deleteBP();
             } 
             for (let i = 0; i < branchesToRemove.length; i++){
                 let branch = branchesToRemove[i];
-                branch.path.token.play.removeBranch(branch);
                 branch.deleteBranch();
             }
             selected = null;
@@ -88,12 +83,17 @@ function deleteObject() {
 // MAKE A TOKEN
 //////////////////////////////////////////////////////////////////////
 
-function makeToken(color, xpos, ypos, string, image = null){
+function makeToken(color='orange', xpos, ypos, string, image = null){
     const t = new Token(play);
     t.createTokenVisual(color, xpos, ypos, '60px', '60px', 'square');
     if (image){t.setTokenImage(image, 'contain', 'no-repeat', 'center');}
-    t.allowDrag(true); //only use if want user interactivity
-    setPathExtensionListener('dblclick', t); //only use if want user interactivity
+    if (string === 'WR' || string === 'RB' || string === 'QB'){
+        t.allowDrag(true); //only use if want user interactivity
+        setPathExtensionListener('dblclick', t); //only use if want user interactivity
+    } else {
+        t.allowDrag(false); 
+    }
+    
     const visual = t.getDOMElement();
     if (string === undefined){
         string ='';
@@ -103,11 +103,11 @@ function makeToken(color, xpos, ypos, string, image = null){
 }
 
 //o-line
-for (let i = 0; i < 5; i++){makeToken('orange', 24 + (i*4) + 'em',20 + 'em', 'OL');}
-makeToken('transparent', 10 + 'em', 20 + 'em','', 'images/helmet.png');
-makeToken('orange', 54 + 'em', 20 + 'em', 'WR');
-makeToken('orange', 32 + 'em', 24 + 'em', 'QB');
-makeToken('orange', 32 + 'em', 28 + 'em', 'RB');
+for (let i = 0; i < 5; i++){makeToken('transparent', 24 + (i*4) + 'em',20 + 'em', 'OL', 'images/helmet.png');}
+makeToken('transparent', 10 + 'em', 20 + 'em','WR', 'images/helmet.png');
+makeToken('transparent', 54 + 'em', 20 + 'em', 'WR' , 'images/helmet.png');
+makeToken('transparent', 32 + 'em', 24 + 'em', 'QB', 'images/helmet.png');
+makeToken('transparent', 32 + 'em', 28 + 'em', 'RB', 'images/helmet.png');
 
 //create paths for tokens
 //////////////////////////////////////////////////////////////////////
