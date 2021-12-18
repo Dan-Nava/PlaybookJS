@@ -5,7 +5,7 @@
     margin: 0.1em;
 }
 
-#example-1-button-bar{
+#button-bar{
     display: flex; 
     flex-direction: row;
     justify-content: space-between;
@@ -17,8 +17,30 @@
     margin-bottom: 0.2em;
 }
 
+#info-text{
+    margin-bottom: 0.5em;
+}
+
 hr.solid{
-    margin: 2em;
+    margin: 1em;
     border-top: 0.1em solid black;
     width:100%;
+}
+
+#nav-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#examples-button {
+    margin-right: 2em;
+}
+
+#docs-button {
+    margin-left: 2em;
+}
+
+.nav-button {
+    width: 6em;
 }
