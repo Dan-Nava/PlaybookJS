@@ -26,6 +26,37 @@ function Play() {
 }
     
 Play.prototype =  {
+    runAnimations(duration, delay = 0, iterations = 1, easing = 'linear') {
+        for (let i = 0; i < this.tokens.length; i++){
+            this.tokens[i].runAnimation(duration, delay, iterations, easing);
+            this.tokens[i].allowDrag(false);
+            let bps = this.tokens[i].path.breakPoints;
+            for (let j = 0; j < bps.length; j++){bps[j].allowDrag(false);}
+        }
+    },
+    resetAnimations() {
+        for (let i = 0; i < this.tokens.length; i++){
+            this.tokens[i].resetAnimation();
+            this.tokens[i].allowDrag(true);
+            let bps = this.tokens[i].path.breakPoints;
+            for (let j = 0; j < bps.length; j++){bps[j].allowDrag(true);}
+        }
+    },
+    pauseAnimations() {
+        for (let i = 0; i < this.tokens.length; i++){
+            this.tokens[i].pauseAnimation();
+        }
+    },
+    resumeAnimations() {
+        for (let i = 0; i < this.tokens.length; i++){
+            this.tokens[i].resumeAnimation();
+        }
+    },
+    getAllTokenAnimations() {
+        for (let i = 0; i < this.tokens.length; i){
+            return this.tokens[i].getAllAnimations();
+        }   
+    },
     // connects field to play and viceversa
     addField(field) {
         this.field = field;
@@ -67,18 +98,30 @@ function Field(play) {
 Field.prototype = {
     // DOM FUNCTION
     createField(container, id, width, height, borderStyle, backgroundColor) {
-        this.id = id;
-
         const field = document.createElement('div');
-        field.id = id;
         field.style.width = width;
         field.style.height = height;
         field.style.border = borderStyle;
         field.style.backgroundColor = backgroundColor;
-        field.style.position = 'relative';
+       
 
+
+        this.setField(field, container, id)
+    },
+    setField(field, container, id) {
+        this.id = id;
+        field.id = id;
+        field.style.position = 'relative';
         const body = container;
-        body.append(field);
+        body.append(field); 
+    },
+
+    setFieldImage(imageSrc, size, repeat, position) {
+        const elem = this.getDOMElement();
+        elem.style.backgroundImage = 'url(' + imageSrc + ')';
+        elem.style.backgroundRepeat = repeat;
+        elem.style.backgroundSize = size;
+        elem.style.backgroundPosition = position;
     },
 
     selectObject(e) {
@@ -112,10 +155,10 @@ Field.prototype = {
         this.deleteFieldVisual();
     },
     deleteFieldVisual(){
-        $('#' + this.id)[0].remove();
+        this.getDOMElement().remove();
     },
-    getFieldID() {
-        return this.id;
+    getDOMElement() {
+        return  $('#' + this.id)[0];
     },
 
 }
@@ -124,10 +167,10 @@ Field.prototype = {
 function Token(play) {
     this.play = play;
     this.path = null;
+    this.animationInfo = {numOfAnimations: null, animationsFinished: null}
     this.id = 'token' + (play.tokens.length);
     play.addToken(this);
     this.createTokenPath();
-    //this.createToken(id, color, xpos, ypos);
 }
 
 Token.prototype = {
@@ -235,6 +278,14 @@ Token.prototype = {
         field.append(token);
     },
 
+    setTokenImage(imageSrc, size, repeat, position) {
+        const elem = this.getDOMElement();
+        elem.style.backgroundImage = 'url(' + imageSrc + ')';
+        elem.style.backgroundRepeat = repeat;
+        elem.style.backgroundSize = size;
+        elem.style.backgroundPosition = position;
+    },
+
     getDOMElement(){
         return $('#' + this.id)[0];
     },
@@ -247,23 +298,21 @@ Token.prototype = {
     },
 
     deleteTokenVisual(){
-        $('#' + this.id)[0].remove();
+       this.getDOMElement().remove();
     },
 
-    SetPathExtensionListener(tokenExtendPathEvent, bpExtendPathEvent, letBPDrag = true){
-        let t = this;
-        $('#' + t.id)[0].addEventListener(tokenExtendPathEvent, handleEvent);
-
-        function handleEvent(){
-            if (t.path.breakPoints.length === 0){
-                t.path.extendPath(bpExtendPathEvent, letBPDrag);
-            }
+    canAddJointFromHere() {
+        if (this.path.breakPoints.length === 0){
+            return true
+        } else {
+            return false
         }
     },
 
     //animates token along its entire path
-    animateAll(array, value) {
-        const token = $('#' + this.id)[0];
+    animateAll(array, value, duration, delay, iterations, easing) {
+        let t = this;
+        const token = this.getDOMElement();
         const destination = $('#' + array[value].id)[0];
         let tokenX = token.offsetLeft + token.clientWidth / 2;
         let tokenY = token.offsetTop + token.clientHeight / 2;
@@ -273,30 +322,39 @@ Token.prototype = {
         const dy = destinationY - tokenY;
 
         const anim = token.animate([{ transform: 'translateX(' + dx + 'px) translateY(' + dy + 'px)' }],
-            { duration: 500, easing: 'linear' });
-
+            { duration: duration, delay: delay, iterations: iterations, easing: easing });
         anim.onfinish = function () {
             token.style.transform = 'translateX(' + dx + 'px) translateY(' + dy + 'px)';
+            t.animationInfo.animationsFinished += 1;
         };
 
         if (value < array.length - 1) {
             anim.onfinish = () => {
+                t.animationInfo.animationsFinished += 1;
                 token.style.transform = 'translateX(' + dx + 'px) translateY(' + dy + 'px)';
-                this.animateAll(array, value + 1);
+                this.animateAll(array, value + 1, duration, delay, iterations, easing);
             };
         }
     },
 
-    runAnimation() {
-        let token = $('#' + this.id)[0];
+    currentAnimation() {
+        return this.getDOMElement().getAnimations();  
+    },
+
+    runAnimation(duration, delay = 0, iterations = 1, easing = 'linear', array = this.path.breakPoints) {
+        let token = this.getDOMElement();
+         this.animationInfo.numOfAnimations = array.length;
+         this.animationInfo.animationsFinished = 0;
         //runs animation only if token is at its initial position
-        if (this.path.breakPoints.length !== 0 && token.style.transform === '') {
-            this.animateAll(this.path.breakPoints, 0);
+        if (array.length !== 0 && token.style.transform === '') {
+            this.animateAll(array, 0, duration, delay, iterations, easing);
         }
     },
 
     resetAnimation() {
-        let token = $('#' + this.id)[0];
+        this.animationInfo.numOfAnimations = null;
+        this.animationInfo.animationsFinished = null;
+        let token =this.getDOMElement();
         //this for loop accounts for reseting mid animation
         if (token.getAnimations().length !== 0) {
             for (let i = 0; i < token.getAnimations().length; i++) {
@@ -308,14 +366,14 @@ Token.prototype = {
     },
 
     pauseAnimation() {
-        let token = $('#' + this.id)[0];
+        let token = this.getDOMElement();
         if (token.getAnimations().length !== 0) {
             token.getAnimations().at(-1).pause();
         }   
     },
 
     resumeAnimation() {
-        let token = $('#' + this.id)[0];
+        let token = this.getDOMElement();
         if (token.getAnimations().length !== 0) {
             token.getAnimations().at(-1).play();
         }
@@ -323,13 +381,8 @@ Token.prototype = {
 
     createTokenPath(){ 
         const path = new Path(this, this.id + '-path');
-        this.addPath(path);
-    },
-
-    addPath(path) {
         this.path = path;
     },
-
     removePath() {
         this.path = null;
     },
@@ -344,13 +397,12 @@ function Path(token, id) {
 }
 
 Path.prototype = {
-    //we note this is the ONLY time branches + bps are made
-    //triggerEvent refers to how breakpoints will extend 
-    extendPath(bpExtendPathEvent, letBPDrag) {
-
+    //We note this is the ONLY time branches + bps are made
+    //this specifically only creates the js objects for 1 branch and 1 BP (no visuals)
+    createPathJoint() {
         //create BP and Branch objects
-        const bp = new BreakPoint(this);
-        const branch = new Branch(this);
+        const bp = new BreakPoint(this, this.id + '-bp' + this.breakPoints.length);
+        const branch = new Branch(this, this.id + '-branch' + this.branches.length);
 
         //add BP & branch to arrays
         if (this.branches.length === 0) { //empty so, startBP is the token
@@ -366,18 +418,13 @@ Path.prototype = {
 
         bp.leftBranch = branch; //assigns new branch to leftbranch of new BP
 
+        //adds BP and Branch to Path arrays
         this.addBranch(branch);
         this.addBreakPoint(bp);
-
-        // create BP and Branch visuals
-        bp.createBreakPoint(this.id + '-bp' + this.breakPoints.indexOf(bp), branch.startBP);
-        bp.allowDrag(letBPDrag);
-        bp.setExtendPathListener(bpExtendPathEvent, true);
-        branch.createBranch(this.id + '-branch' + this.branches.indexOf(branch));
-
-        //Adds bp and branch to arrays of all bps and branches in play object
+        //adds BP and Branch to Play arrays
         this.token.play.addBreakPoint(bp);
         this.token.play.addBranch(branch);
+        return {breakPoint: bp, branch: branch}
     },
 
     addBreakPoint(bp) {
@@ -395,35 +442,41 @@ Path.prototype = {
 }
 
 
-function Branch(path) {
-    this.id = null;
+function Branch(path, id) {
+    this.id = id;
     this.path = path;
     this.startBP = null;
     this.endBP = null;
 }
 
 Branch.prototype = {
-    createBranch(id) {
-        const start = $('#' + this.startBP.id)[0];
+    createBranchVisual(color, width, height) {
+        const start = this.startBP.getDOMElement();
         const branch = document.createElement('div');
-        branch.style = 'width: 20px; height: 10px; background-color: black;';
+        branch.style = 'width:' + width + '; height:' + height + '; background-color: ' + color + ';';
         branch.style.position = 'absolute';
         branch.style.zIndex = '1';
         branch.style.top = (start.offsetTop + start.clientHeight / 2) + 'px';
         branch.style.left = (start.offsetLeft + (start.clientWidth / 2) - 10) + 'px';
         branch.style.transformOrigin = 0 + 'px 5px';
         branch.style.transition = 'rotate 0.1s';
-        branch.id = id;
+        branch.id = this.id;
         branch.className = 'playbook-branch';
-        this.id = id;
 
-        const field = $('#' + this.path.token.play.field.id)[0];
+        const field = this.path.token.play.field.getDOMElement();
         field.append(branch);
         this.updateBranchPosition();
     },
+    setBranchImage(imageSrc, size, repeat, position) {
+        const elem = this.getDOMElement();
+        elem.style.backgroundImage = 'url(' + imageSrc + ')';
+        elem.style.backgroundRepeat = repeat;
+        elem.style.backgroundSize = size;
+        elem.style.backgroundPosition = position;
+    },
     updateBranchPosition() {
-        const startBP = $('#' + this.startBP.id)[0];
-        const endBP = $('#' + this.endBP.id)[0];
+        const startBP = this.startBP.getDOMElement();
+        const endBP = this.endBP.getDOMElement();
         const startX = startBP.offsetLeft + startBP.clientWidth / 2;
         const startY = startBP.offsetTop + startBP.clientHeight / 2;
         const endX = endBP.offsetLeft + endBP.clientWidth / 2;
@@ -435,10 +488,15 @@ Branch.prototype = {
         //angle between the branch and X-axis
         const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
 
-        $('#' + this.id)[0].style.width = length + 'px';
-        $('#' + this.id)[0].style.left = (startBP.offsetLeft + startBP.clientWidth / 2) + 'px';
-        $('#' + this.id)[0].style.top = (startBP.offsetTop + startBP.clientHeight / 2) + 'px';
-        $('#' + this.id)[0].style.transform = 'rotate(' + angle + 'deg)';
+        const visual = this.getDOMElement();
+        visual.style.width = length + 'px';
+        visual.style.left = (startBP.offsetLeft + startBP.clientWidth / 2) + 'px';
+        visual.style.top = (startBP.offsetTop + startBP.clientHeight / 2) + 'px';
+        visual.style.transform = 'rotate(' + angle + 'deg)';
+    },
+
+    getDOMElement() {
+        return $('#' + this.id)[0];
     },
 
     deleteBranch(){
@@ -450,11 +508,11 @@ Branch.prototype = {
     },
 
     deleteBranchVisual() {
-        $('#' + this.id)[0].remove();
+        this.getDOMElement().remove();
     },
 
     toggleVisibility(visible){
-        let branch = $('#' + this.id)[0];
+        let branch = this.getDOMElement();
 
         if (!visible){
             branch.style.visibility = 'hidden';
@@ -466,8 +524,8 @@ Branch.prototype = {
 }
 
 
-function BreakPoint(path) {
-    this.id = null;
+function BreakPoint(path, id) {
+    this.id = id;
     this.path = path;
     this.leftBranch = null;
     this.rightBranch = null;
@@ -475,22 +533,39 @@ function BreakPoint(path) {
 
 BreakPoint.prototype = {
     //DOM
-    createBreakPoint(id, token) {
+    createBPVisual(color, xpos, ypos, width, height, shape) {
+        // const token = this.leftBranch.startBP.getDOMElement();
         const bp = document.createElement('div');
-        bp.style = 'width: 40px; height: 40px; border-radius: 50%; background-color: rgb(0,0,0, 0.4);';
+        let borderRadius;
+        if (shape === 'circle'){
+            borderRadius = '50%'
+        } else if (shape === 'square'){
+            borderRadius = '0%'
+        }
+        bp.style = 'width:' + width + '; height:' + height + 
+        '; border-radius:' + borderRadius + '; background-color:' + color + ';';
         bp.style.position = 'absolute';
         bp.style.zIndex = '3';
-        bp.style.top = $('#' + token.id)[0].offsetTop + 'px';
-        bp.style.left = $('#' + token.id)[0].offsetLeft + 'px';
-
-        bp.id = id;
-        this.id = id;
-        bp.className = 'playbook-breakpoint';
-
-        const field = $('#' + this.path.token.play.field.id)[0];
-        field.append(bp);
+        this.setBPVisual(bp, xpos, ypos);
     },
 
+    //DOM FCN
+    setBPVisual(bp, xpos, ypos){
+        bp.style.top = ypos;
+        bp.style.left = xpos;
+        bp.className = 'playbook-breakpoint';
+        bp.id = this.id;
+        
+        const field = this.path.token.play.field.getDOMElement();
+        field.append(bp);
+    },
+    setBPImage(imageSrc, size, repeat, position) {
+        const elem = this.getDOMElement();
+        elem.style.backgroundImage = 'url(' + imageSrc + ')';
+        elem.style.backgroundRepeat = repeat;
+        elem.style.backgroundSize = size;
+        elem.style.backgroundPosition = position;
+    },
     deleteBP(){
         this.path = null;
         this.rightBranch = null;
@@ -500,7 +575,7 @@ BreakPoint.prototype = {
     },
 
     deleteBPVisual(){
-        $('#' + this.id)[0].remove();
+        this.getDOMElement().remove();
     },
 
     getDOMElement(){
@@ -508,7 +583,7 @@ BreakPoint.prototype = {
     },
 
     toggleVisibility(visible){
-        let bp = $('#' + this.id)[0];
+        let bp = this.getDOMElement();
         if (!visible){
             bp.style.visibility = 'hidden';
         }
@@ -517,16 +592,11 @@ BreakPoint.prototype = {
         }
     },
 
-    setExtendPathListener(ExtendPathEvent = null, letBPDrag) {
-        if (ExtendPathEvent === null) {
-            return;
-        }
-        $('#' + this.id)[0].addEventListener(ExtendPathEvent, handleEvent);
-        let t = this;
-        function handleEvent() {
-            if (t.rightBranch === null) {
-                t.path.extendPath(ExtendPathEvent, letBPDrag);
-            }
+    canAddJointFromHere() {
+        if (!this.rightBranch){
+            return true
+        } else {
+            return false
         }
     },
 
@@ -543,8 +613,8 @@ BreakPoint.prototype = {
 
     //DOM FUNCTION
     allowDrag(enable) {
-        let token = $('#' + this.id)[0];
-        let parent = $('#' + this.path.token.play.field.id)[0];
+        let token = this.getDOMElement();
+        let parent = this.path.token.play.field.getDOMElement();
         let cursorX = null;
         let cursorY = null;
         let t = this;

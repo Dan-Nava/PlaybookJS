@@ -2,22 +2,19 @@
 
 const play = new Play();
 const field1 = new Field(play);
-// play.addField(field1);
-field1.createField($('#field-container')[0], 'field1', '70em', '37em', '0.5em solid black', 'green');
-
+field1.createField($('#field-container')[0], 'field1', '65em', '39em', '0.5em solid black', 'transparent');
+field1.setFieldImage( 'images/field.jpg', 'cover', 'center', 'no-repeat');
 ////SELECTION & DELETION CODE///////
 let selected = null;
 let prevStyle = null;
 //selection
-// $("#" + field1.id)[0].addEventListener('click', select);
-
-$("#" + field1.id)[0].addEventListener('click', select);;
+field1.getDOMElement().addEventListener('click', select);
 function select(e){ //this function does the VISUAL selection
     let previous = selected;
     let bps;
 
     if (previous){ //VISUAL - reverts previously selected token + path to unselected visual
-        $('#' + previous.id)[0].style.border = prevStyle;
+       previous.getDOMElement().style.border = prevStyle;
         bps = selected.path.breakPoints;
         for (let i = 0; i < bps.length; i++){
             bps[i].toggleVisibility(false);
@@ -32,10 +29,9 @@ function select(e){ //this function does the VISUAL selection
         }
     }
 
-    if (selected instanceof Branch){selected = null;}
-    if (selected) { //VISUAL - changes selected token + path to select visual
-       prevStyle = $('#' + selected.id)[0].style.border;
-       $('#' + selected.id)[0].style.border = '3px solid red';
+    if (selected && !(selected instanceof Branch)) { //VISUAL - changes selected token + path to select visual
+       prevStyle = selected.getDOMElement().style.border;
+       selected.getDOMElement().style.border = '3px solid red';
     }
 }
 
@@ -92,75 +88,67 @@ function deleteObject() {
 // MAKE A TOKEN
 //////////////////////////////////////////////////////////////////////
 
-function makeToken(xpos, ypos, string){
+function makeToken(color, xpos, ypos, string, image = null){
     const t = new Token(play);
-    t.createTokenVisual('orange', xpos, ypos, '60px', '60px', 'circle');
+    t.createTokenVisual(color, xpos, ypos, '60px', '60px', 'square');
+    if (image){t.setTokenImage(image, 'contain', 'no-repeat', 'center');}
     t.allowDrag(true); //only use if want user interactivity
-    t.SetPathExtensionListener('dblclick', 'dblclick', true); //only use if want user interactivity
+    setPathExtensionListener('dblclick', t); //only use if want user interactivity
     const visual = t.getDOMElement();
     if (string === undefined){
         string ='';
     }
-    visual.innerHTML = "<p><font size=5>" + string + "</font></p>";
+    visual.innerHTML = "<p><font size=5 color='blue'>" + string + "</font></p>";
     visual.style.textAlign = 'center';
-    return t.id;
 }
 
 //o-line
-for (let i = 0; i < 5; i++){makeToken(24 + (i*4) + 'em',20 + 'em', 'OL');}
-makeToken(10 + 'em', 20 + 'em', 'WW');
-makeToken(54 + 'em', 20 + 'em', 'WR');
-makeToken(32 + 'em', 24 + 'em', 'QB');
-makeToken(32 + 'em', 28 + 'em', 'RB');
+for (let i = 0; i < 5; i++){makeToken('orange', 24 + (i*4) + 'em',20 + 'em', 'OL');}
+makeToken('transparent', 10 + 'em', 20 + 'em','', 'images/helmet.png');
+makeToken('orange', 54 + 'em', 20 + 'em', 'WR');
+makeToken('orange', 32 + 'em', 24 + 'em', 'QB');
+makeToken('orange', 32 + 'em', 28 + 'em', 'RB');
 
+//create paths for tokens
 //////////////////////////////////////////////////////////////////////
 
 const token1Path = play.tokens[6].path;
-token1Path.extendPath('dblclick', true);
-let bp1 = token1Path.breakPoints[0];
-bp1.setExtendPathListener('dblclick', true);
-bp1.setBPPosition('54.5em', '5em');
-token1Path.extendPath('dblclick', true);
-let bp12 = token1Path.breakPoints[1];
-bp12.setBPPosition('45.5em', '5em');
+let joint = token1Path.createPathJoint();
+joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)','54.5em', '5em',
+'60px', '60px', 'circle');
+setPathExtensionListener('dblclick', joint.breakPoint);
+joint.breakPoint.toggleVisibility(false);
+joint.branch.createBranchVisual('black', '12px', '12px');
+joint.breakPoint.allowDrag(true);
 
-play.tokens[5].path.extendPath('dblclick', false);
-let bp2 = play.tokens[5].path.breakPoints[0];
-bp2.setExtendPathListener('dblclick', false);
-bp2.setBPPosition('10.5em', '5em');
+const tokenpath2 = play.tokens[5].path;
+joint = tokenpath2.createPathJoint();
+joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)', '10.5em', '5em',
+'60px', '60px', 'circle');
+setPathExtensionListener('dblclick', joint.breakPoint);
+joint.breakPoint.toggleVisibility(false);
+joint.branch.createBranchVisual('black', '12px', '12px');
+joint.breakPoint.allowDrag(true);
 
 //////////////////////////////////////////////////////////////////////////
 
 function run() {
-    for (let i = 0; i < play.tokens.length; i++){
-        play.tokens[i].runAnimation();
-        play.tokens[i].allowDrag(false);
-        let bps = play.tokens[i].path.breakPoints;
-        for (let j = 0; j < bps.length; j++){bps[j].allowDrag(false);}
-    }
+    play.runAnimations(500);
     animStateHandler(true);
+    
 }
 
 function reset(){
-    for (let i = 0; i < play.tokens.length; i++){
-        play.tokens[i].resetAnimation();
-        play.tokens[i].allowDrag(true);
-        let bps = play.tokens[i].path.breakPoints;
-        for (let j = 0; j < bps.length; j++){bps[j].allowDrag(true);}
-    }
+    play.resetAnimations();
     animStateHandler(false);
 }
 
 function pause() {
-    for (let i = 0; i < play.tokens.length; i++){
-        play.tokens[i].pauseAnimation();
-    }
+    play.pauseAnimations();
 }
 
 function resume() {
-    for (let i = 0; i < play.tokens.length; i++){
-        play.tokens[i].resumeAnimation();
-    }
+    play.resumeAnimations();
 }
 
 function animStateHandler(running) {
@@ -189,3 +177,18 @@ function animStateHandler(running) {
     }
 }
 animStateHandler();
+
+function setPathExtensionListener(event, object){
+    object.getDOMElement().addEventListener(event, handleEvent);
+    function handleEvent(){
+        if (object.canAddJointFromHere()){
+            const joint = object.path.createPathJoint();
+            const token = joint.branch.startBP.getDOMElement();
+            joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)', token.offsetLeft + 'px', token.offsetTop + 'px',
+            '60px', '60px', 'circle');
+            joint.breakPoint.allowDrag(true);
+            setPathExtensionListener('dblclick', joint.breakPoint);
+            joint.branch.createBranchVisual('black', '12px', '12px');
+        }
+    }
+}
