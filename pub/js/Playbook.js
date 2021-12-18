@@ -1,5 +1,55 @@
 "use strict";
 (function(global, document, $) {
+    
+    //Private functions 
+    function _deleteVisual(object) {
+        object.getDOMElement().remove();
+    }
+
+    function _updateBranchPosition(branch) {
+        const startBP = branch.startBP.getDOMElement();
+        const endBP = branch.endBP.getDOMElement();
+        const startX = startBP.offsetLeft + startBP.clientWidth / 2;
+        const startY = startBP.offsetTop + startBP.clientHeight / 2;
+        const endX = endBP.offsetLeft + endBP.clientWidth / 2;
+        const endY = endBP.offsetTop + endBP.clientHeight / 2;
+
+        //first find length of the branch
+        const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+
+        //angle between the branch and X-axis
+        const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+
+        const visual = branch.getDOMElement();
+        visual.style.width = length + 'px';
+        visual.style.left = (startBP.offsetLeft + startBP.clientWidth / 2) + 'px';
+        visual.style.top = (startBP.offsetTop + startBP.clientHeight / 2) + 'px';
+        visual.style.transform = 'rotate(' + angle + 'deg)';
+    }
+
+    //checks if token are ever out of bounds
+    //unfortunately this solution only works with rectangular fields ATM
+    function _checkOutOfBounds(token, parent) {
+        if (parent.getBoundingClientRect().right < token.getBoundingClientRect().right) {
+            token.style.left = (parent.clientWidth - token.offsetWidth) + 'px';
+            return true;
+        }
+        if (parent.getBoundingClientRect().left > token.getBoundingClientRect().left) {
+            token.style.left = 0 + 'px';
+            return true;
+        }
+        if (parent.getBoundingClientRect().top > token.getBoundingClientRect().top) {
+            token.style.top = 0 + 'px';
+            return true;
+        }
+        if (parent.getBoundingClientRect().bottom < token.getBoundingClientRect().bottom) {
+            token.style.top = (parent.clientHeight - token.offsetHeight) + 'px';
+            return true;
+        }
+        return false;
+    }
+
+
 // the constructor function should instantiate any variables that
 //  each Playbook instance should have a unique version of.
     function Playbook() {
@@ -52,11 +102,7 @@
                 this.tokens[i].resumeAnimation();
             }
         },
-        getAllTokenAnimations() {
-            for (let i = 0; i < this.tokens.length; i){
-                return this.tokens[i].getAllAnimations();
-            }   
-        },
+
         // connects field to play and viceversa
         addField(field) {
             this.field = field;
@@ -112,6 +158,7 @@
             this.id = id;
             field.id = id;
             field.style.position = 'relative';
+            field.className='playbook-field';
             const body = container;
             body.append(field); 
         },
@@ -124,6 +171,7 @@
             elem.style.backgroundPosition = position;
         },
 
+        //returns object of selected element
         selectObject(e) {
             const targetClass = e.target.className;
             const targetID = e.target.id;
@@ -152,10 +200,7 @@
 
         deleteField() {
             this.play = null;
-            this.deleteFieldVisual();
-        },
-        deleteFieldVisual(){
-            this.getDOMElement().remove();
+            _deleteVisual(this);
         },
         getDOMElement() {
             return  $('#' + this.id)[0];
@@ -176,18 +221,14 @@
     Token.prototype = {
         //DOM FUNCTION
         allowDrag(enable) {
-            let token = $('#' + this.id)[0];
-            let parent = $('#' + this.play.field.id)[0];
+            let token = this.getDOMElement();
+            let parent = this.play.field.getDOMElement();
             let cursorX = null;
             let cursorY = null;
             let t = this;
 
-            if (enable) {
-                token.onmousedown = handleMouseDown;
-            }
-            else {
-                token.onmousedown = null;
-            }
+            if (enable) {token.onmousedown = handleMouseDown;}
+            else {token.onmousedown = null;}
 
             //handles mouse click/hold on token
             function handleMouseDown(e) {
@@ -197,33 +238,9 @@
                 document.onmouseup = () => {
                     document.onmouseup = null;
                     document.onmousemove = null;
-                    if (t.path.branches.length > 0) {
-                        t.path.branches[0].updateBranchPosition();
-                    }
+                    if (t.path.branches.length > 0) { _updateBranchPosition(t.path.branches[0]);}
                 };
                 document.onmousemove = dragToken;
-            }
-
-            //checks if token are ever out of bounds
-            //unfortunately this solution only works with rectangular fields ATM
-            function checkOutOfBounds() {
-                if (parent.getBoundingClientRect().right < token.getBoundingClientRect().right) {
-                    token.style.left = (parent.clientWidth - token.offsetWidth) + 'px';
-                    return true;
-                }
-                if (parent.getBoundingClientRect().left > token.getBoundingClientRect().left) {
-                    token.style.left = 0 + 'px';
-                    return true;
-                }
-                if (parent.getBoundingClientRect().top > token.getBoundingClientRect().top) {
-                    token.style.top = 0 + 'px';
-                    return true;
-                }
-                if (parent.getBoundingClientRect().bottom < token.getBoundingClientRect().bottom) {
-                    token.style.top = (parent.clientHeight - token.offsetHeight) + 'px';
-                    return true;
-                }
-                return false;
             }
 
             //updates pos of token based on cursor (drag effect)
@@ -232,12 +249,10 @@
                 let diffX = cursorX - e.clientX;
                 let diffY = cursorY - e.clientY;
                 //stops token from exiting field
-                if (checkOutOfBounds()) {
+                if (_checkOutOfBounds(token, parent)) {
                     document.onmouseup = null;
                     document.onmousemove = null;
-                    if (t.path.branches.length > 0) {
-                        t.path.branches[0].updateBranchPosition();
-                    }
+                    if (t.path.branches.length > 0) { _updateBranchPosition(t.path.branches[0]);}
                 }
                 else {
                     //updates current pos of cursor
@@ -290,16 +305,22 @@
             return $('#' + this.id)[0];
         },
 
+        setTokenPosition(x, y) {
+            const token = this.getDOMElement();
+            token.style.left = x;
+            token.style.top = y;
+
+            if (this.path.branches > 0){
+                _updateBranchPosition(this.path.branches[0]);
+            }
+        },
+
         deleteToken(){
             this.play.removeToken(this);
             this.path.token = null;
             this.path = null;
             this.play = null;
-            this.deleteTokenVisual();
-        },
-
-        deleteTokenVisual(){
-        this.getDOMElement().remove();
+            _deleteVisual(this);
         },
 
         canAddJointFromHere() {
@@ -385,6 +406,8 @@
             this.path = path;
         },
         removePath() {
+            this.path.deleteEntirePath();
+            this.path.token = null;
             this.path = null;
         },
     }
@@ -440,6 +463,15 @@
         removeBranch(branch) {
             this.branches = this.branches.filter(b => b !== branch);
         },
+
+        deleteEntirePath() {
+            for (let i = 0; i < this.branches.length; i++){
+                this.branches[i].deleteBranch();
+            }
+            for (let i = 0; i < this.breakPoints.length; i){
+                this.breanPoints[i].deleteBP();
+            }
+        }
     }
 
 
@@ -449,6 +481,7 @@
         this.startBP = null;
         this.endBP = null;
     }
+
 
     Branch.prototype = {
         createBranchVisual(color, width, height) {
@@ -466,7 +499,7 @@
 
             const field = this.path.token.play.field.getDOMElement();
             field.append(branch);
-            this.updateBranchPosition();
+            _updateBranchPosition(this);
         },
         setBranchImage(imageSrc, size, repeat, position) {
             const elem = this.getDOMElement();
@@ -474,26 +507,6 @@
             elem.style.backgroundRepeat = repeat;
             elem.style.backgroundSize = size;
             elem.style.backgroundPosition = position;
-        },
-        updateBranchPosition() {
-            const startBP = this.startBP.getDOMElement();
-            const endBP = this.endBP.getDOMElement();
-            const startX = startBP.offsetLeft + startBP.clientWidth / 2;
-            const startY = startBP.offsetTop + startBP.clientHeight / 2;
-            const endX = endBP.offsetLeft + endBP.clientWidth / 2;
-            const endY = endBP.offsetTop + endBP.clientHeight / 2;
-
-            //first find length of the branch
-            const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
-
-            //angle between the branch and X-axis
-            const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
-
-            const visual = this.getDOMElement();
-            visual.style.width = length + 'px';
-            visual.style.left = (startBP.offsetLeft + startBP.clientWidth / 2) + 'px';
-            visual.style.top = (startBP.offsetTop + startBP.clientHeight / 2) + 'px';
-            visual.style.transform = 'rotate(' + angle + 'deg)';
         },
 
         getDOMElement() {
@@ -506,16 +519,11 @@
             this.endBP = null;
             this.startBP.rightBranch = null;
             this.startBP = null;
-            this.deleteBranchVisual();
-        },
-
-        deleteBranchVisual() {
-            this.getDOMElement().remove();
+            _deleteVisual(this);
         },
 
         toggleVisibility(visible){
             let branch = this.getDOMElement();
-
             if (!visible){
                 branch.style.visibility = 'hidden';
             }
@@ -574,11 +582,7 @@
             this.rightBranch = null;
             this.leftBranch = null;
             //left branch will ALWAYS hold a value, right may not
-            this.deleteBPVisual();
-        },
-
-        deleteBPVisual(){
-            this.getDOMElement().remove();
+            _deleteVisual(this);
         },
 
         getDOMElement(){
@@ -608,9 +612,9 @@
             bp.style.left = x;
             bp.style.top = y;
 
-            this.leftBranch.updateBranchPosition();
+            _updateBranchPosition(this.leftBranch);
             if (this.rightBranch){
-                this.rightBranch.updateBranchPosition();
+                _updateBranchPosition(this.rightBranch);
             }
         },
 
@@ -637,32 +641,10 @@
                 document.onmouseup = () => {
                     document.onmouseup = null;
                     document.onmousemove = null;
-                    t.leftBranch.updateBranchPosition();
-                    if (t.rightBranch !== null) { t.rightBranch.updateBranchPosition(); }
+                    _updateBranchPosition(t.leftBranch);
+                    if (t.rightBranch !== null) { _updateBranchPosition(t.rightBranch); }
                 };
                 document.onmousemove = dragToken;
-            }
-
-            //checks if token are ever out of bounds
-            //unfortunately this solution only works with rectangular fields ATM
-            function checkOutOfBounds() {
-                if (parent.getBoundingClientRect().right < token.getBoundingClientRect().right) {
-                    token.style.left = (parent.clientWidth - token.offsetWidth) + 'px';
-                    return true;
-                }
-                if (parent.getBoundingClientRect().left > token.getBoundingClientRect().left) {
-                    token.style.left = 0 + 'px';
-                    return true;
-                }
-                if (parent.getBoundingClientRect().top > token.getBoundingClientRect().top) {
-                    token.style.top = 0 + 'px';
-                    return true;
-                }
-                if (parent.getBoundingClientRect().bottom < token.getBoundingClientRect().bottom) {
-                    token.style.top = (parent.clientHeight - token.offsetHeight) + 'px';
-                    return true;
-                }
-                return false;
             }
 
             //updates pos of token based on cursor (drag effect)
@@ -671,12 +653,12 @@
                 let diffX = cursorX - e.clientX;
                 let diffY = cursorY - e.clientY;
                 //stops token from exiting field
-                if (checkOutOfBounds()) {
+                if (_checkOutOfBounds(token, parent)) {
                     document.onmouseup = null;
                     document.onmousemove = null;
-                    t.leftBranch.updateBranchPosition();
+                    _updateBranchPosition(t.leftBranch);
                     if (t.rightBranch !== null) {
-                        t.rightBranch.updateBranchPosition();
+                        _updateBranchPosition(t.rightBranch);
                     }
                 }
                 else {
