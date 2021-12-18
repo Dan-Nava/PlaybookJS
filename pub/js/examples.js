@@ -1,18 +1,22 @@
 "use strict";
 
 const play = new Play();
-const field1 = new Field();
-play.addField(field1);
+const field1 = new Field(play);
+// play.addField(field1);
 field1.createField($('#field-container')[0], 'field1', '70em', '37em', '0.5em solid black', 'green');
+
+////SELECTION & DELETION CODE///////
 let selected = null;
 let prevStyle = null;
 //selection
-$("#" + field1.id)[0].addEventListener('click', select);
-function select(e){
+// $("#" + field1.id)[0].addEventListener('click', select);
+
+$("#" + field1.id)[0].addEventListener('click', select);;
+function select(e){ //this function does the VISUAL selection
     let previous = selected;
     let bps;
 
-    if (previous){
+    if (previous){ //VISUAL - reverts previously selected token + path to unselected visual
         $('#' + previous.id)[0].style.border = prevStyle;
         bps = selected.path.breakPoints;
         for (let i = 0; i < bps.length; i++){
@@ -21,7 +25,7 @@ function select(e){
     }
 
     selected = field1.selectObject(e);
-    if (selected){
+    if (selected){  //VISUAL - changes selected token + path to select visual
         bps = selected.path.breakPoints;
         for (let i = 0; i < bps.length; i++){
             bps[i].toggleVisibility(true);
@@ -29,7 +33,7 @@ function select(e){
     }
 
     if (selected instanceof Branch){selected = null;}
-    if (selected) {
+    if (selected) { //VISUAL - changes selected token + path to select visual
        prevStyle = $('#' + selected.id)[0].style.border;
        $('#' + selected.id)[0].style.border = '3px solid red';
     }
@@ -37,35 +41,34 @@ function select(e){
 
 //this deletion will delete everything starting from the token and bp
 function deleteObject() {
+   
     let bpsToRemove;
     let branchesToRemove;
 
-    if (selected === null){
+    if (selected === null){ //if nothing's selected ignore this
         return null;
     }
 
-    switch (selected.constructor.name) {
-        case 'Token':
-            bpsToRemove = selected.path.breakPoints;
-            branchesToRemove = selected.path.branches;
+    if (selected instanceof Token){
+        bpsToRemove = selected.path.breakPoints;
+        branchesToRemove = selected.path.branches;
 
-            for (let i = 0; i < bpsToRemove.length; i++) {
-                let bp = bpsToRemove[i];
-                bp.path.token.play.removeBreakPoint(bp);
-                bp.deleteBP();
-            } 
-            for (let i = 0; i < branchesToRemove.length; i++){
-                let branch = branchesToRemove[i];
-                branch.path.token.play.removeBranch(branch);
-                branch.deleteBranch();
-            }
-            selected.play.removeToken(selected);
-            selected.deleteToken();
-            selected = null;
-            prevStyle = null; 
-            break;
-
-        case 'BreakPoint':
+        for (let i = 0; i < bpsToRemove.length; i++) {
+            let bp = bpsToRemove[i];
+            bp.path.token.play.removeBreakPoint(bp);
+            bp.deleteBP();
+        } 
+        for (let i = 0; i < branchesToRemove.length; i++){
+            let branch = branchesToRemove[i];
+            branch.path.token.play.removeBranch(branch);
+            branch.deleteBranch();
+        }
+        selected.play.removeToken(selected);
+        selected.deleteToken();
+        selected = null;
+        prevStyle = null; 
+    }
+    else if (selected instanceof BreakPoint) {
             bpsToRemove = selected.path.breakPoints
             .splice(selected.path.breakPoints.indexOf(selected));
             branchesToRemove = selected.path.branches
@@ -83,50 +86,50 @@ function deleteObject() {
             }
             selected = null;
             prevStyle = null;
-            break;
-            
-        default:
-            return null;
+        }
     }
-}
+
+// MAKE A TOKEN
+//////////////////////////////////////////////////////////////////////
 
 function makeToken(xpos, ypos, string){
-    const t = new Token();
-    play.addToken(t);
-    t.createToken('token' + play.tokens.indexOf(t), 'orange', xpos, ypos);
-    t.allowDrag(true);
-    t.extendPathFromToken('dblclick', 'dblclick');
+    const t = new Token(play);
+    t.createTokenVisual('orange', xpos, ypos, '60px', '60px', 'circle');
+    t.allowDrag(true); //only use if want user interactivity
+    t.SetPathExtensionListener('dblclick', 'dblclick', true); //only use if want user interactivity
+    const visual = t.getDOMElement();
     if (string === undefined){
         string ='';
     }
-    $('#' + t.id)[0].innerHTML = "<p><font size=5>" + string + "</font></p>";
-    $('#' + t.id)[0].style.textAlign = 'center';
+    visual.innerHTML = "<p><font size=5>" + string + "</font></p>";
+    visual.style.textAlign = 'center';
+    return t.id;
 }
 
 //o-line
-for (let i = 0; i < 5; i++){makeToken(24 + (i*4),20, 'OL');}
-makeToken(10, 20, 'WR');
-makeToken(54, 20, 'WR');
-makeToken(32, 24, 'QB');
-makeToken(32, 28, 'RB');
+for (let i = 0; i < 5; i++){makeToken(24 + (i*4) + 'em',20 + 'em', 'OL');}
+makeToken(10 + 'em', 20 + 'em', 'WW');
+makeToken(54 + 'em', 20 + 'em', 'WR');
+makeToken(32 + 'em', 24 + 'em', 'QB');
+makeToken(32 + 'em', 28 + 'em', 'RB');
 
-//extremely jank, will need to refactor library functions to avoid this from happening
-// creates 2 basic paths for both WR tokens
-play.tokens[6].path.extendPath();
-let bp1 = play.tokens[6].path.breakPoints[0];
-$('#' + bp1.id)[0].style.top = '5em';
-$('#' + bp1.id)[0].style.left = '54.5em';
-bp1.extendPathFromBP('dblclick');
-bp1.leftBranch.updateBranchPosition();
-bp1.toggleVisibility(false);
+//////////////////////////////////////////////////////////////////////
 
-play.tokens[5].path.extendPath();
+const token1Path = play.tokens[6].path;
+token1Path.extendPath('dblclick', true);
+let bp1 = token1Path.breakPoints[0];
+bp1.setExtendPathListener('dblclick', true);
+bp1.setBPPosition('54.5em', '5em');
+token1Path.extendPath('dblclick', true);
+let bp12 = token1Path.breakPoints[1];
+bp12.setBPPosition('45.5em', '5em');
+
+play.tokens[5].path.extendPath('dblclick', false);
 let bp2 = play.tokens[5].path.breakPoints[0];
-bp2.extendPathFromBP('dblclick');
-$('#' + bp2.id)[0].style.top = '5em';
-$('#' + bp2.id)[0].style.left = '10.5em';
-bp2.leftBranch.updateBranchPosition();
-bp2.toggleVisibility(false);
+bp2.setExtendPathListener('dblclick', false);
+bp2.setBPPosition('10.5em', '5em');
+
+//////////////////////////////////////////////////////////////////////////
 
 function run() {
     for (let i = 0; i < play.tokens.length; i++){
