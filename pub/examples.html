@@ -37,6 +37,44 @@
                         <span class='type'>const</span> <span>field1 = </span> <span>new</span> 
                         <span class='fcn'>Field</span><span>(play1);</span>
                     </div>
+                    <div>
+                        <span>field1.</span><span class='fcn'>createField</span><span>($(</span>
+                        <span class='string'>'#example-one-container'</span><span>)[0],</span><span class='string'>'field1'</span>
+                        <span>,</span><span class='string'>'50em'</span><span>,</span><span class='string'>'30em'</span><span>,</span>
+                        <span class='string'>'0.5em solid black'</span><span>,</span><span class='string'>'green'</span><span>);</span>
+                    </div>
+                    <div>
+                        <span>field1.</span><span class='fcn'>setFieldImage</span><span>(null,</span>
+                        <span class='string'>'cover'</span><span>,</span><span class='string'>'center'</span>
+                        <span>,</span><span class='string'>'no-repeat'</span><span>,</span><span class='string'>);</span>
+                    </div>
+                    <br>
+                    <div>function MakeFriendlyToken(xpos, ypos) {</div>
+                    <div class='indent'>const t = new Token(play1);</div>
+                    <div class='indent'>t.createTokenVisual('blue', xpos, ypos, '4em', '4em', 'circle');</div>
+                    <div>}</div>
+                    <br>
+                    <div>let example1_xpos = 13;</div>
+                    <div>let example1_ypos = 18;</div>
+                    <div>for (let i = 0; i - 5; i++){</div>
+                    <div class='indent'>MakeFriendlyToken(example1_xpos + 'em', example1_ypos + 'em');</div>
+                    <div class='indent'>example1_xpos += 5;</div>
+                    <div>}</div>
+                    <br>
+                    <div>function createFriendlyPath(token, xpos, ypos) {</div>
+                    <div class='indent'>const tokenP = token.path;</div>
+                    <div class='indent'>let joint = tokenP.createPathJoint();</div>
+                    <div class='indent'>joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)', xpos + 'em',</div>
+                    <div class='indent'> ypos +  'em', '4em', '4em', 'circle');</div>
+                    <div class='indent'>joint.branch.createBranchVisual('black', '12px', '12px');</div>
+                    <div>}</div>
+                    <br>
+                    <div>createFriendlyPath(play1.tokens[0], 13, 8)</div>
+                    <div>createFriendlyPath(play1.tokens[0].path.breakPoints[0], 8, 2)</div>
+                    
+                    <div>createFriendlyPath(play1.tokens[3], 40, 6);</div>
+                    <div>createFriendlyPath(play1.tokens[3].path.breakPoints[0], 30, 10)</div>
+                    <div>createFriendlyPath(play1.tokens[3].path.breakPoints[1], 30, 2)</div>
                 </code>
             </div>
         </div>

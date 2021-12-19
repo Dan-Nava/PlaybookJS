@@ -30,16 +30,25 @@ createFriendlyPath(play1.tokens[0].path.breakPoints[0], 8, 2)
 createFriendlyPath(play1.tokens[3], 40, 6);
 createFriendlyPath(play1.tokens[3].path.breakPoints[0], 30, 10)
 createFriendlyPath(play1.tokens[3].path.breakPoints[1], 30, 2)
-
-
-//////// EXAMPLE 1 ////////
+//////// END OF EXAMPLE 1 ////////
 
 //////// EXAMPLE 2 ////////
+
 const play2 = new Play();
 const field2 = new Field(play2);
 field2.createField($('#example-two-container')[0], 'field2', '65em', '39em', '0.5em solid black', 'transparent');
 field2.setFieldImage( 'images/field.jpg', 'cover', 'center', 'no-repeat');
 
+function run() {
+    play1.runAnimations(500);
+    animStateHandler(true);
+    
+}
+
+function reset(){
+    play1.resetAnimations();
+    animStateHandler(false);
+}
 
 //////// EXAMPLE 1 ////////
 
