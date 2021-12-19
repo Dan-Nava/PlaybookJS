@@ -200,8 +200,7 @@ makeToken('transparent', 32 + 'em', 28 + 'em', 'RB', 'images/helmet.png');
 //create paths for tokens
 const token1Path = play3.tokens[6].path;
 let joint = token1Path.createPathJoint();
-joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)','54em', '5em',
-'60px', '60px', 'circle');
+joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)','54em', '5em','60px', '60px', 'circle');
 setPathExtensionListener('dblclick', joint.breakPoint);
 joint.breakPoint.toggleVisibility(false);
 joint.branch.createBranchVisual('black', '12px', '12px');
@@ -209,8 +208,7 @@ joint.breakPoint.allowDrag(true);
 
 const tokenpath2 = play3.tokens[5].path;
 joint = tokenpath2.createPathJoint();
-joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)', '10em', '5em',
-'60px', '60px', 'circle');
+joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)', '10em', '5em','60px', '60px', 'circle');
 setPathExtensionListener('dblclick', joint.breakPoint);
 joint.breakPoint.toggleVisibility(false);
 joint.branch.createBranchVisual('black', '12px', '12px');
@@ -221,7 +219,6 @@ joint.breakPoint.allowDrag(true);
 function run() {
     play3.runAnimations(500);
     animStateHandler(true);
-    
 }
 
 function reset(){

@@ -91,6 +91,13 @@ hr.solid{
 .indent{
     margin-left: 2em;
 }
+.indent2{
+    margin-left: 4em;
+}
+
+.indent3{
+    margin-left: 6em;
+}
 
 #long-text{
     width: 49em;

@@ -173,8 +173,40 @@
                 </div> 
             </div>
             <div class='code-container'>
+                <code>
+                    <div>function makeToken(color='transparent', xpos, ypos, string, image='images/red.png'){</div>
+                        <div class='indent'>const token3 = new Token(play3);</div>
+                        <div class='indent'>token3.createTokenVisual(color, xpos, ypos, '60px', '60px', 'square');</div>
+                        <div class='indent'>if (image) {</div>
+                            <div class='indent2'> token3.setTokenImage(image, 'contain', 'no-repeat', 'center');</div>
+                        <div class='indent'>}</div>
+                        <div class='indent'>token3.allowDrag(true);</div>
+                        <div class='indent'>setPathExtensionListener('dblclick', token3);</div>
+                        <div class='indent'>const visual = token3.getDOMElement();</div>
+                        <div class='indent'>if (string === undefined){string ='';}</div>
+                        <div class='indent'>visual.innerHTML = "&lt/p&gt" + string + "&lt/p&gt";</div>
+                        <div class='indent'>visual.style.textAlign = 'center';</div>
+                   <div>}</div>
+                    <br>
+                    <div>//allows to set tokens and bps to extend the path upon 'event'</div>
+                    <div>function setPathExtensionListener(event, object){</div>
+                        <div class='indent'>object.getDOMElement().addEventListener(event, handleEvent);</div>
+                        <div class='indent'>function handleEvent(){</div>
+                            <div class='indent2'>if (object.canAddJointFromHere()){</div>
+                            <div class='indent3'>const joint = object.path.createPathJoint();</div>
+                            <div class='indent3'>const token = joint.branch.startBP.getDOMElement();</div>
+                            <div class='indent3'>joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)', 
+                                token.offsetLeft + 'px', token.offsetTop + 'px',</div>
+                            <div class='indent3'>'60px', '60px', 'circle');</div>
+                            <div class='indent3'>joint.breakPoint.allowDrag(true);</div>
+                            <div class='indent3'>setPathExtensionListener('dblclick', joint.breakPoint);</div>
+                            <div class='indent3'>joint.branch.createBranchVisual('black', '12px', '12px');</div>
+                        <div class='indent2'>}</div>
+                        <div class='indent'>}</div>
+                        <div>}</div>
+                </code>
             </div>
-            <p>Note: not all code is shown here</p>
+            <p>Note: not all code is shown for Example 3</p>
         </div>
      </div>
 
