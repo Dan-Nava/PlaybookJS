@@ -71,3 +71,11 @@ hr.solid{
     background-color: rgb(0,0,0, 0.15);
     padding: 1em;
 }
+
+.type {
+    color: blue;
+}
+
+.fcn{
+    color: brown;
+}
