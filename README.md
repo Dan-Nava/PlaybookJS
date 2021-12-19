@@ -6,8 +6,10 @@ Getting Started:
 Note that this library utilizes JQuery, as such it must be acquired first.
 
 On your webpage you will need both a JQuery script and a script for Playbook in this order:
+```
     <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script defer type="text/javascript" src='js/Playbook.js'></script>
+```
 
 To setup a simple scenario of a Play, Field, and Token with a 1 branch path see the code below:
 ```
