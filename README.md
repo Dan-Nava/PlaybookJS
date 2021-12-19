@@ -1,7 +1,7 @@
-Landing Page: https://afternoon-ocean-99848.herokuapp.com/ 
-Documentation: https://afternoon-ocean-99848.herokuapp.com/Docs
+##Landing Page: https://afternoon-ocean-99848.herokuapp.com/ 
+##Documentation: https://afternoon-ocean-99848.herokuapp.com/Docs
 
-Getting Started:
+##Getting Started:
 
 Note that this library utilizes JQuery, as such it must be acquired first.
 
