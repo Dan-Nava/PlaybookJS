@@ -27,7 +27,7 @@
 
 #info-text{
     font-size: 1.3em;
-    margin-bottom: 0.5em;
+    margin-bottom: 0.4em;
 }
 
 hr.solid{
@@ -107,3 +107,18 @@ hr.solid{
 .doc-text{
     margin:0.2em;
 }
+
+#table th {
+    padding: 1em;
+    text-align: center;
+    max-width: 25em;
+    background-color: darkblue;
+    color: white;
+  }
+
+  #table td {
+    padding:1em;
+    max-width: 25em;
+    text-align: center;
+    background-color: lightgrey;
+  }

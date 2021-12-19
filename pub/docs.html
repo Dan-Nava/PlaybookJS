@@ -43,5 +43,93 @@
     <div>//The animation can then be run by using:</div>
     <div>play.runAnimations(500);</div>
     </code>
+    <br>
+    <br>
+    <div id='info-text'><b> Token Object API </b></div>
+    <p>The central object in the library, all functionality is built to interact/manipulate this
+        object.</p>
+    <code class='code-container'>
+        Attributes:
+        {Play play, Path path, Object animationInfo = { Int numOfAnimations, Int animationsFinished}, String id}
+    </code>
+    <table id="table">
+        <tr>
+          <th>Function</th>
+          <th>Description</th>
+          <th>Return</th>
+        </tr>
+        <tr>
+            <td><code>allowDrag(boolean enable)</code></td>
+            <td>Enables or Disables ability to drag token around when clicking and holding over token.</td>
+            <td>N/A</td>
+          </tr>
+          <tr>
+            <td><code>createTokenVisual( rgb color, string xpos, string ypos, string width, string height, string shape)</code></td>
+            <td>Creates Token DOM element based on specifications. shape can be either 'circle' or 'square'</td>
+            <td>N/A</td>
+          </tr>
+          <tr>
+            <td><code>setTokenVisual(Token token, string xpos, string ypos)</code></td>
+            <td>Takes a created DOM element and sets it as the Token's DOM element representation.
+                Custom DOM elements can be used here to have them function as a token.
+            </td>
+            <td>N/A</td>
+          </tr>
+          <tr>
+            <td><code> setTokenImage(string imageSrc, string size, string repeat, string position)</code></td>
+            <td>Sets a background-image for the Token DOM element. Size, repeat and position potential values
+                are the same as CSS image equivalents
+            </td>
+            <td>N/A</td>
+          </tr>
+          <tr>
+            <td><code>getDOMElement()</code></td>
+            <td> Retrieve's the objects respective DOM element
+            </td>
+            <td>DOM Element</td>
+          </tr>
+          <tr>
+            <td><code>setTokenPosition(string x, string y)</code></td>
+            <td> sets position of token's DOM element.
+            </td>
+            <td>N/A</td>
+          </tr>
+          <tr>
+            <td><code>deleteToken()</code></td>
+            <td> Removes Token from associated Path and Play object references and deletes the Token's DOM element
+            </td>
+            <td>N/A</td>
+          </tr>
+          <tr>
+            <td><code>canAddJointFromHere()</code></td>
+            <td> Returns true iff Token currently has no BreakPoints, and thus can have its path extended from it.
+            </td>
+            <td>Boolean</td>
+          </tr>
+          <tr>
+            <td><code>animateAll(any array, int value, int duration, int delay, int iterations, string easing)</code></td>
+            <td> Animates Token across all Branches and BreakPoints in the given array. Duration and Delay are in milliseconds.
+            </td>
+            <td>N/A</td>
+          </tr>
+          <tr>
+            <td><code>currentAnimation()</code></td>
+            <td> Returns currentAnimation Object that is affecting the Token's DOM element
+            </td>
+            <td>Animation object</td>
+          </tr>
+          <tr>
+            <td><code>runAnimation(int duration, int delay, int iterations, string easing, any array)</code></td>
+            <td> Calls animateAll iff Token is the start of the animation (start of its Path).
+            </td>
+            <td>N/A</td>
+          </tr>
+          <tr>
+            <td><code>resetAnimation()</code></td>
+            <td> Resets animation loop and repositions Token DOM element to its initial position
+            </td>
+            <td>N/A</td>
+          </tr>
+    </table>
  </body>
 </html>
