@@ -14,27 +14,47 @@
  </head>
  <body id='main-body'>
     <div id='title'> PlaybookJS </div>
-    <div id='info-text'> insert text about what this is gonna be about here </div>
+    <div id='info-text'> Simplify the process of creating playbook-esque visuals and animations </div>
     <hr class='solid'>
     <div id='nav-bar'>
-        <button onclick="location.href='/Docs'"> Examples </button>
-        <button class='nav-button' id='docs-button'> Docs </button>
+        <button class='nav-button' id='docs-button' onclick="location.href='/Docs'"> Docs </button>
+        <button class='nav-button' id='examples-button' onclick="location.href='/'"> Examples </button>
     </div>
     <hr class='solid'>
-    <div id='button-bar'>
-        <span id='animation-controls'>
-            Animation Controls:
-            <button id='run-button' onclick= run()> Run </button>
-            <button id='reset-button' onclick= reset()> Reset </button>
-            <button id='pause-button' onclick= pause()> Pause </button>
-            <button id='unpause-button' onclick= resume()> Resume </button>
-        </span>
-        <span id='creation-controls'>
-            Creation Controls:
-            <button id='create-button' onclick= makeToken()> Create Token </button>
-            <button id='delete-button' onclick= deleteObject()> Delete </button>
-        </span>
+
+     <div>
+        <div class='container' id='container-one'>
+            <div class='example-container' id='example-one-container'>
+                <p><b> Basic Static Play Visual </b></p>
+                <p> Basic visual with some tokens and paths made up of branches and breakpoints.
+                    The visual is static and un-interactable.
+                </p>
+            </div>
+            <div class='code-container'>
+                <code> code goes here </code>
+            </div>
+        </div>
+        <div class='example-container' id='example-two-container'>
+
+        </div>
+        
+        <div class='example-container' id='example-three-container'>
+            <div id='button-bar'>
+                <span id='animation-controls'>
+                    Animation Controls:
+                    <button id='run-button' onclick= run()> Run </button>
+                    <button id='reset-button' onclick= reset()> Reset </button>
+                    <button id='pause-button' onclick= pause()> Pause </button>
+                    <button id='unpause-button' onclick= resume()> Resume </button>
+                </span>
+                <span id='creation-controls'>
+                    Creation Controls:
+                    <button id='create-button' onclick= makeToken()> Create Token </button>
+                    <button id='delete-button' onclick= deleteObject()> Delete </button>
+                </span>
+             </div> 
+        </div>
      </div>
-     <div id='field-container'></div>
+
  </body>
 </html>

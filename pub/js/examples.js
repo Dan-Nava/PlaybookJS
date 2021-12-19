@@ -1,14 +1,60 @@
 "use strict";
+//////// EXAMPLE 1 ////////
+const play1 = new Play();
+const field1 = new Field(play1);
+field1.createField($('#example-one-container')[0], 'field1', '50em', '30em', '0.5em solid black', 'green');
+field1.setFieldImage( null, 'cover', 'center', 'no-repeat');
 
-const play = new Play();
-const field1 = new Field(play);
-field1.createField($('#field-container')[0], 'field1', '65em', '39em', '0.5em solid black', 'transparent');
-field1.setFieldImage( 'images/field.jpg', 'cover', 'center', 'no-repeat');
-////SELECTION & DELETION CODE///////
+function MakeFriendlyToken(xpos, ypos) {
+    const t = new Token(play1);
+    t.createTokenVisual('blue', xpos, ypos, '4em', '4em', 'circle');
+}
+let example1_xpos = 13;
+let example1_ypos = 18;
+for (let i = 0; i < 5; i++){
+    MakeFriendlyToken(example1_xpos + 'em', example1_ypos + 'em');
+    example1_xpos += 5;
+}
+
+function createFriendlyPath(token, xpos, ypos) {
+    const tokenP = token.path;
+    let joint = tokenP.createPathJoint();
+    joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)', xpos + 'em' , 
+    ypos +  'em', '4em', '4em', 'circle');
+    joint.branch.createBranchVisual('black', '12px', '12px');
+}
+
+createFriendlyPath(play1.tokens[0], 13, 8)
+createFriendlyPath(play1.tokens[0].path.breakPoints[0], 8, 2)
+
+createFriendlyPath(play1.tokens[3], 40, 6);
+createFriendlyPath(play1.tokens[3].path.breakPoints[0], 30, 10)
+createFriendlyPath(play1.tokens[3].path.breakPoints[1], 30, 2)
+
+
+//////// EXAMPLE 1 ////////
+
+//////// EXAMPLE 2 ////////
+const play2 = new Play();
+const field2 = new Field(play2);
+field2.createField($('#example-two-container')[0], 'field2', '65em', '39em', '0.5em solid black', 'transparent');
+field2.setFieldImage( 'images/field.jpg', 'cover', 'center', 'no-repeat');
+
+
+//////// EXAMPLE 1 ////////
+
+//////// EXAMPLE 3 ////////
+const play3 = new Play();
+const field3 = new Field(play3);
+field3.createField($('#example-three-container')[0], 'field3', '65em', '39em', '0.5em solid black', 'transparent');
+field3.setFieldImage( 'images/field.jpg', 'cover', 'center', 'no-repeat');
+
+//Select functionality
 let selected = null;
 let prevStyle = null;
 //selection
-field1.getDOMElement().addEventListener('click', select);
+field3.getDOMElement().addEventListener('click', select);
+
 function select(e){ //this function does the VISUAL selection
     let previous = selected;
     let bps;
@@ -21,7 +67,7 @@ function select(e){ //this function does the VISUAL selection
         }
     }
 
-    selected = field1.selectObject(e);
+    selected = field3.selectObject(e);
     if (selected){  //VISUAL - changes selected token + path to select visual
         bps = selected.path.breakPoints;
         for (let i = 0; i < bps.length; i++){
@@ -35,7 +81,7 @@ function select(e){ //this function does the VISUAL selection
     }
 }
 
-//this deletion will delete everything starting from the token and bp
+//Delete functionality
 function deleteObject() {
    
     let bpsToRemove;
@@ -84,46 +130,38 @@ function deleteObject() {
 //////////////////////////////////////////////////////////////////////
 
 function makeToken(color='orange', xpos, ypos, string, image = null){
-    const t = new Token(play);
-    t.createTokenVisual(color, xpos, ypos, '60px', '60px', 'square');
-    if (image){t.setTokenImage(image, 'contain', 'no-repeat', 'center');}
-    if (string === 'WR' || string === 'RB' || string === 'QB'){
-        t.allowDrag(true); //only use if want user interactivity
-        setPathExtensionListener('dblclick', t); //only use if want user interactivity
-    } else {
-        t.allowDrag(false); 
-    }
-    
-    const visual = t.getDOMElement();
-    if (string === undefined){
-        string ='';
-    }
+    const token3 = new Token(play3);
+    token3.createTokenVisual(color, xpos, ypos, '60px', '60px', 'square');
+    if (image){token3.setTokenImage(image, 'contain', 'no-repeat', 'center');}
+    token3.allowDrag(true);
+    setPathExtensionListener('dblclick', token3);
+    const visual = token3.getDOMElement();
+    if (string === undefined){string ='';}
     visual.innerHTML = "<p><font size=5 color='blue'>" + string + "</font></p>";
     visual.style.textAlign = 'center';
 }
 
 //o-line
 for (let i = 0; i < 5; i++){makeToken('transparent', 24 + (i*4) + 'em',20 + 'em', 'OL', 'images/helmet.png');}
+//other players
 makeToken('transparent', 10 + 'em', 20 + 'em','WR', 'images/helmet.png');
 makeToken('transparent', 54 + 'em', 20 + 'em', 'WR' , 'images/helmet.png');
 makeToken('transparent', 32 + 'em', 24 + 'em', 'QB', 'images/helmet.png');
 makeToken('transparent', 32 + 'em', 28 + 'em', 'RB', 'images/helmet.png');
 
 //create paths for tokens
-//////////////////////////////////////////////////////////////////////
-
-const token1Path = play.tokens[6].path;
+const token1Path = play3.tokens[6].path;
 let joint = token1Path.createPathJoint();
-joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)','54.5em', '5em',
+joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)','54em', '5em',
 '60px', '60px', 'circle');
 setPathExtensionListener('dblclick', joint.breakPoint);
 joint.breakPoint.toggleVisibility(false);
 joint.branch.createBranchVisual('black', '12px', '12px');
 joint.breakPoint.allowDrag(true);
 
-const tokenpath2 = play.tokens[5].path;
+const tokenpath2 = play3.tokens[5].path;
 joint = tokenpath2.createPathJoint();
-joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)', '10.5em', '5em',
+joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)', '10em', '5em',
 '60px', '60px', 'circle');
 setPathExtensionListener('dblclick', joint.breakPoint);
 joint.breakPoint.toggleVisibility(false);
@@ -133,22 +171,22 @@ joint.breakPoint.allowDrag(true);
 //////////////////////////////////////////////////////////////////////////
 
 function run() {
-    play.runAnimations(500);
+    play3.runAnimations(500);
     animStateHandler(true);
     
 }
 
 function reset(){
-    play.resetAnimations();
+    play3.resetAnimations();
     animStateHandler(false);
 }
 
 function pause() {
-    play.pauseAnimations();
+    play3.pauseAnimations();
 }
 
 function resume() {
-    play.resumeAnimations();
+    play3.resumeAnimations();
 }
 
 function animStateHandler(running) {
@@ -178,6 +216,7 @@ function animStateHandler(running) {
 }
 animStateHandler();
 
+//allows to set tokens and bps to extend the path upon 'event'
 function setPathExtensionListener(event, object){
     object.getDOMElement().addEventListener(event, handleEvent);
     function handleEvent(){
@@ -192,3 +231,4 @@ function setPathExtensionListener(event, object){
         }
     }
 }
+//////// EXAMPLE 3 ////////

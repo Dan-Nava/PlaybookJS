@@ -165,7 +165,9 @@
 
         setFieldImage(imageSrc, size, repeat, position) {
             const elem = this.getDOMElement();
-            elem.style.backgroundImage = 'url(' + imageSrc + ')';
+            if (imageSrc) {
+                elem.style.backgroundImage = 'url(' + imageSrc + ')';
+            }
             elem.style.backgroundRepeat = repeat;
             elem.style.backgroundSize = size;
             elem.style.backgroundPosition = position;
@@ -213,7 +215,7 @@
         this.play = play;
         this.path = null;
         this.animationInfo = {numOfAnimations: null, animationsFinished: null}
-        this.id = 'token' + (play.tokens.length);
+        this.id = this.play.id + this.play.field.id + 'token' + (play.tokens.length);
         play.addToken(this);
         this.createTokenPath();
     }
@@ -295,7 +297,9 @@
 
         setTokenImage(imageSrc, size, repeat, position) {
             const elem = this.getDOMElement();
-            elem.style.backgroundImage = 'url(' + imageSrc + ')';
+            if (imageSrc) {
+                elem.style.backgroundImage = 'url(' + imageSrc + ')';
+            }
             elem.style.backgroundRepeat = repeat;
             elem.style.backgroundSize = size;
             elem.style.backgroundPosition = position;
@@ -503,7 +507,9 @@
         },
         setBranchImage(imageSrc, size, repeat, position) {
             const elem = this.getDOMElement();
-            elem.style.backgroundImage = 'url(' + imageSrc + ')';
+            if (imageSrc) {
+                elem.style.backgroundImage = 'url(' + imageSrc + ')';
+            }
             elem.style.backgroundRepeat = repeat;
             elem.style.backgroundSize = size;
             elem.style.backgroundPosition = position;
@@ -571,7 +577,9 @@
         },
         setBPImage(imageSrc, size, repeat, position) {
             const elem = this.getDOMElement();
-            elem.style.backgroundImage = 'url(' + imageSrc + ')';
+            if (imageSrc) {
+                elem.style.backgroundImage = 'url(' + imageSrc + ')';
+            }
             elem.style.backgroundRepeat = repeat;
             elem.style.backgroundSize = size;
             elem.style.backgroundPosition = position;

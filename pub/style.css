@@ -12,12 +12,21 @@
     margin-bottom: 0.5em;
 }
 
+#creation-controls {
+    margin-left: 2em;
+}
+
+#animation-controls {
+    margin-right: 2em;
+}
+
 #title{
     font-size: 6em;
     margin-bottom: 0.2em;
 }
 
 #info-text{
+    font-size: 1.3em;
     margin-bottom: 0.5em;
 }
 
@@ -34,13 +43,31 @@ hr.solid{
 }
 
 #examples-button {
-    margin-right: 2em;
+    margin-left: 2em;
 }
 
 #docs-button {
-    margin-left: 2em;
+    margin-right: 2em;
 }
 
 .nav-button {
     width: 6em;
+}
+
+.example-container {
+    margin: 2em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.code-container {
+    background-color: rgb(0,0,0, 0.15);
+    padding: 1em;
 }
