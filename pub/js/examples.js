@@ -39,18 +39,56 @@ const field2 = new Field(play2);
 field2.createField($('#example-two-container')[0], 'field2', '65em', '39em', '0.5em solid black', 'transparent');
 field2.setFieldImage( 'images/field.jpg', 'cover', 'center', 'no-repeat');
 
-function run() {
-    play1.runAnimations(500);
-    animStateHandler(true);
-    
+function run2() {
+    play2.runAnimations(500);
+    animState(true);
 }
 
-function reset(){
-    play1.resetAnimations();
-    animStateHandler(false);
+function reset2(){
+    play2.resetAnimations();
+    animState(false);
 }
 
-//////// EXAMPLE 1 ////////
+function animState(running) {
+    let runButton = $('#run2')[0];
+    let resetButton = $('#reset2')[0];
+
+    if (!running){
+        resetButton.disabled = true;
+        runButton.disabled = false;
+    }
+    else{
+        resetButton.disabled = false;
+        runButton.disabled = true;
+    }
+}
+animState();
+
+function tokenMake(xpos, ypos, image){
+    const token2 = new Token(play2);
+    token2.createTokenVisual('transparent', xpos, ypos, '60px', '60px', 'square');
+    token2.setTokenImage(image,'contain', 'no-repeat', 'center');
+}
+
+tokenMake(31 + 'em', 26 + 'em', 'images/helmet.png');
+tokenMake(31 + 'em', 16 + 'em', 'images/red.png');
+
+function makePath(token, xpos, ypos, color) {
+    const tokenP = token.path;
+    let joint = tokenP.createPathJoint();
+    joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)', xpos, 
+    ypos, '4em', '4em', 'circle');
+    joint.breakPoint.toggleVisibility(false);
+    joint.branch.createBranchVisual(color, '12px', '12px');
+}
+
+makePath(play2.tokens[0], 31 + 'em', 10 + 'em', 'yellow');
+makePath(play2.tokens[0].path.breakPoints[0], 45 + 'em', 3 + 'em', 'yellow');
+
+makePath(play2.tokens[1], 33 + 'em', 12 + 'em', 'red');
+makePath(play2.tokens[1].path.breakPoints[0], 45 + 'em', 5 + 'em', 'red');
+
+//////// END OF EXAMPLE 2////////
 
 //////// EXAMPLE 3 ////////
 const play3 = new Play();
@@ -61,7 +99,6 @@ field3.setFieldImage( 'images/field.jpg', 'cover', 'center', 'no-repeat');
 //Select functionality
 let selected = null;
 let prevStyle = null;
-//selection
 field3.getDOMElement().addEventListener('click', select);
 
 function select(e){ //this function does the VISUAL selection
@@ -138,10 +175,12 @@ function deleteObject() {
 // MAKE A TOKEN
 //////////////////////////////////////////////////////////////////////
 
-function makeToken(color='orange', xpos, ypos, string, image = null){
+function makeToken(color='transparent', xpos, ypos, string, image='images/red.png'){
     const token3 = new Token(play3);
     token3.createTokenVisual(color, xpos, ypos, '60px', '60px', 'square');
-    if (image){token3.setTokenImage(image, 'contain', 'no-repeat', 'center');}
+    if (image) {
+        token3.setTokenImage(image, 'contain', 'no-repeat', 'center');
+    }
     token3.allowDrag(true);
     setPathExtensionListener('dblclick', token3);
     const visual = token3.getDOMElement();
@@ -199,8 +238,8 @@ function resume() {
 }
 
 function animStateHandler(running) {
-    let runButton = $('#run-button')[0];
-    let resetButton = $('#reset-button')[0];
+    let runButton = $('#run')[0];
+    let resetButton = $('#reset')[0];
     let pauseButton = $('#pause-button')[0];
     let unpauseButton = $('#unpause-button')[0];
     let createButton = $('#create-button')[0];

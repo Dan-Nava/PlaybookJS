@@ -5,7 +5,7 @@
     margin: 0.1em;
 }
 
-#button-bar{
+.button-bar{
     display: flex; 
     flex-direction: row;
     justify-content: space-between;
@@ -72,6 +72,10 @@ hr.solid{
     padding: 1em;
 }
 
+#code2{
+    padding: 2em;
+}
+
 .type {
     color: blue;
 }
@@ -86,4 +90,9 @@ hr.solid{
 
 .indent{
     margin-left: 2em;
+}
+
+#long-text{
+    width: 49em;
+    overflow-wrap: normal;
 }

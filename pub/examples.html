@@ -21,7 +21,6 @@
         <button class='nav-button' id='examples-button' onclick="location.href='/'"> Examples </button>
     </div>
     <hr class='solid'>
-
      <div>
         <div class='container' id='container-one'>
             <div class='example-container' id='example-one-container'>
@@ -56,7 +55,7 @@
                     <br>
                     <div>let example1_xpos = 13;</div>
                     <div>let example1_ypos = 18;</div>
-                    <div>for (let i = 0; i - 5; i++){</div>
+                    <div>for (let i = 0; i &lt 5; i++){</div>
                     <div class='indent'>MakeFriendlyToken(example1_xpos + 'em', example1_ypos + 'em');</div>
                     <div class='indent'>example1_xpos += 5;</div>
                     <div>}</div>
@@ -78,25 +77,104 @@
                 </code>
             </div>
         </div>
-        <div class='example-container' id='example-two-container'>
-
+        <div class='container' id='container-two'> 
+            <div class='example-container' id='example-two-container'>
+                <p><b> Basic Animated Visual With Some Customization </b></p>
+                <p> A visual showcasing animations, use of images and some customization capabilities.
+                    The visual is un-interactable.
+                </p>
+                <div class='button-bar'>
+                    <span id='animation-controls'>
+                        Animation Controls:
+                        <button class='run-button' id='run2' onclick= run2()> Run </button>
+                        <button class='reset-button' id='reset2' onclick= reset2()> Reset </button>
+                    </span>
+                </div>
+            </div>
+            <div class='code-container' id='code2'>
+                <code> 
+                    <span class='type'>const</span> <span>play2 = </span> <span>new</span> <span class='fcn'>Play</span><span>();</span>
+                    <div>
+                        <span class='type'>const</span> <span>field2 = </span> <span>new</span> 
+                        <span class='fcn'>Field</span><span>(play2);</span>
+                    </div>
+                    <div>
+                        <span>field2.</span><span class='fcn'>createField</span><span>($(</span>
+                        <span class='string'>'#example-two-container'</span><span>)[0],</span><span class='string'>'field2'</span>
+                        <span>,</span><span class='string'>'65em'</span><span>,</span><span class='string'>'39em'</span><span>,</span>
+                        <span class='string'>'0.5em solid black'</span><span>,</span><span class='string'>'transparent'</span><span>);</span>
+                    </div>
+                    <div>
+                        <span>field2.</span><span class='fcn'>setFieldImage</span><span>('images/field.jpg',</span>
+                        <span class='string'>'cover'</span><span>,</span><span class='string'>'center'</span>
+                        <span>,</span><span class='string'>'no-repeat'</span><span>,</span><span class='string'>);</span>
+                    </div>
+                    <br>
+                    <div>
+                        <span>function run2() {</span>
+                            <div class='indent'>play2.runAnimations(500);</div>
+                            <div class='indent'> animState(true);</div>
+                        <span>}</span>
+                    </div>
+                    <br>
+                    <div>
+                        <span>function reset2() {</span>
+                            <div class='indent'>play2.resetAnimations();</div>
+                            <div class='indent'> animState(false);</div>
+                        <span>}</span>
+                    </div>
+                    <span>animState();</span>
+                    <br>
+                    <div>function tokenMake(xpos, ypos, image){</div>
+                    <div class='indent'>const token2 = new Token(play2);</div>
+                    <div class='indent'> ctoken2.createTokenVisual('transparent', xpos, ypos, '60px', '60px', 'square');</div>
+                    <div class='indent'>token2.setTokenImage(image,'contain', 'no-repeat', 'center');</div>
+                    <div>}</div>
+                    <br>            
+                    <div>tokenMake(31 + 'em', 26 + 'em', 'images/helmet.png');</div>
+                    <div>tokenMake(31 + 'em', 16 + 'em', 'images/red.png');</div>
+                    <br>
+                    <div>function makePath(token, xpos, ypos, color) {</div>
+                        <div class='indent'>const tokenP = token.path;</div>
+                        <div class='indent'>let joint = tokenP.createPathJoint();</div>
+                        <div class='indent'>joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)', xpos,</div> 
+                        <div class='indent'>ypos, '4em', '4em', 'circle');</div>
+                        <div class='indent'>    joint.breakPoint.toggleVisibility(false);</div>
+                        <div class='indent'>joint.branch.createBranchVisual(color, '12px', '12px');</div>
+                    <div>}</div>
+                    <br/>
+                    <div>makePath(play2.tokens[0], 31 + 'em', 10 + 'em', 'yellow');</div>
+                    <div> makePath(play2.tokens[0].path.breakPoints[0], 45 + 'em', 3 + 'em', 'yellow');</div>
+                    <div>makePath(play2.tokens[1], 33 + 'em', 12 + 'em', 'red');</div>
+                    <div> makePath(play2.tokens[1].path.breakPoints[0], 45 + 'em', 5 + 'em', 'red');</div>
+                </code>
+            </div>
         </div>
-        
-        <div class='example-container' id='example-three-container'>
-            <div id='button-bar'>
-                <span id='animation-controls'>
-                    Animation Controls:
-                    <button id='run-button' onclick= run()> Run </button>
-                    <button id='reset-button' onclick= reset()> Reset </button>
-                    <button id='pause-button' onclick= pause()> Pause </button>
-                    <button id='unpause-button' onclick= resume()> Resume </button>
-                </span>
-                <span id='creation-controls'>
-                    Creation Controls:
-                    <button id='create-button' onclick= makeToken()> Create Token </button>
-                    <button id='delete-button' onclick= deleteObject()> Delete </button>
-                </span>
-             </div> 
+        <div class='container' id='container-three'>
+            <div class='example-container' id='example-three-container'>
+                <p><b> User-Interactive Visual with Customization and Animations </b></p>
+                <p id='long-text'> Robust visual showcasing animations, object customization and user interaction.
+                    Users can select tokens and breakpoints by clicking them, drag tokens, and extend
+                    the paths of tokens by double clicking on the latest endpoint.
+                </p>
+                <div class='button-bar'>
+                    <span id='animation-controls'>
+                        Animation Controls:
+                        <button class='run-button' id='run' onclick= run()> Run </button>
+                        <button class='reset-button' id='reset' onclick= reset()> Reset </button>
+                        <button id='pause-button' onclick= pause()> Pause </button>
+                        <button id='unpause-button' onclick= resume()> Resume </button>
+                    </span>
+                    <span id='creation-controls'>
+                        Creation Controls:
+                        <button id='create-button' onclick= makeToken()> Create Token </button>
+                        <button id='delete-button' onclick= deleteObject()> Delete </button>
+                    </span>
+                </div> 
+            </div>
+            <div class='code-container'>
+            </div>
+            <p>Note: not all code is shown here</p>
         </div>
      </div>
 
