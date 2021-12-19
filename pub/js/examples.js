@@ -3,7 +3,6 @@
 const play1 = new Play();
 const field1 = new Field(play1);
 field1.createField($('#example-one-container')[0], 'field1', '50em', '30em', '0.5em solid black', 'green');
-field1.setFieldImage( null, 'cover', 'center', 'no-repeat');
 
 function MakeFriendlyToken(xpos, ypos) {
     const t = new Token(play1);

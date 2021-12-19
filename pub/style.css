@@ -103,3 +103,7 @@ hr.solid{
     width: 49em;
     overflow-wrap: normal;
 }
+
+.doc-text{
+    margin:0.2em;
+}
