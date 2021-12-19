@@ -13,10 +13,8 @@ To setup a simple scenario of a Play, Field, and Token with a 1 branch path see 
     const play = new Play();
     const field = new Field(play);
     field.createField($('#example-one-container')[0], 'fID', '50em', '30em', '0.5em solid black', 'green');
-
     const t = new Token(play);
     t.createTokenVisual('blue', 13 + 'em', 18 + 'em', '4em', '4em', 'circle');
-
     let joint = t.path.createPathJoint();
     joint.breakPoint.createBPVisual('rgb(0,0,0, 0.4)', 8 + 'em', 2 + 'em', '4em', '4em', 'circle');
     joint.branch.createBranchVisual('black', '12px', '12px');
